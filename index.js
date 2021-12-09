@@ -48,7 +48,7 @@ const SUBS = [
 	},
 ]
 
-const index = fs.readFileSync(__dirname + '/index.html', 'utf8');
+let index = fs.readFileSync(__dirname + '/index.html', 'utf8');
 
 const clientID = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
