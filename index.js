@@ -178,14 +178,17 @@ async function subscribe() {
 		console.log(existing);
 
 		for(var e of existing.data) {
+			if(e.status == 'enabled') continue;
 			await SUB_INST.delete(ENDPOINTS.DELETE_SUBSCRIPTION(e.id));
 		}
 
 		for(var sub of SUBS) {
-			await SUB_INST.post(ENDPOINTS.CREATE_SUBSCRIPTION(), {
-				...sub,
-				transport
-			})
+			if(existing.data.find(s => s.type == sub.type && s.status !== "enabled")) {
+				await SUB_INST.post(ENDPOINTS.CREATE_SUBSCRIPTION(), {
+					...sub,
+					transport
+				})
+			}
 		}
 	} catch(e){
 		console.log(e.message, e.response?.data)
