@@ -48,7 +48,9 @@ const SUBS = [
 	},
 ]
 
-let index = fs.readFileSync(__dirname + '/index.html', 'utf8');
+let index = fs.readFileSync(__dirname + '/index.html', 'utf8')
+	.replace('%PORT%', process.env.WS_PORT || 3000)
+	.replace('%CALLBACK%', process.env.CALLBACK);
 
 const clientID = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
@@ -76,7 +78,6 @@ function verify (req, res, next) {
 }
 
 app.get('/', (req, res) => {
-	index = index.replace('%PORT%', process.env.WS_PORT || 3000);
 	return res.send(index);
 })
 
