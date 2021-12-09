@@ -7,7 +7,7 @@ const express = require('express');
 const app = new express();
 app.use(express.json());
 
-const io = require('socket.io')(3000, {
+const io = require('socket.io')(process.env.WS_PORT || 3000, {
 	cors: { origin: '*' }
 });
 const appNsp = io.of('/notifs');
@@ -54,6 +54,7 @@ const clientID = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
 const appSecret = process.env.APP_SECRET;
 const userID = process.env.USER_ID;
+const callbackURL = process.env.CALLBACK;
 
 var processed = new Map();
 var queue = [];
@@ -75,7 +76,8 @@ function verify (req, res, next) {
 }
 
 app.get('/', (req, res) => {
-	return res.send(index.toString());
+	index = index.replace('%PORT%', process.env.WS_PORT || 3000);
+	return res.send(index);
 })
 
 app.post('/', verify, (req, res) => {
@@ -161,28 +163,32 @@ const SUB_INST = axios.create({
 	}
 })
 async function subscribe() {
-	var token = await getToken();
-	SUB_INST.defaults.headers['Authorization'] = `Bearer ${token}`;
+	try {
+		var token = await getToken();
+		SUB_INST.defaults.headers['Authorization'] = `Bearer ${token}`;
 
-	var transport = {
-		method: 'webhook',
-		callback: 'https://alerts.greysdawn.com/',
-		secret: appSecret
-	}
+		var transport = {
+			method: 'webhook',
+			callback: callbackURL,
+			secret: appSecret
+		}
 
-	var req = await SUB_INST.get(ENDPOINTS.GET_SUBSCRIPTIONS());
-	var existing = req.data;
-	console.log(existing);
+		var req = await SUB_INST.get(ENDPOINTS.GET_SUBSCRIPTIONS());
+		var existing = req.data;
+		console.log(existing);
 
-	for(var e of existing.data) {
-		await SUB_INST.delete(ENDPOINTS.DELETE_SUBSCRIPTION(e.id));
-	}
+		for(var e of existing.data) {
+			await SUB_INST.delete(ENDPOINTS.DELETE_SUBSCRIPTION(e.id));
+		}
 
-	for(var sub of SUBS) {
-		await SUB_INST.post(ENDPOINTS.CREATE_SUBSCRIPTION(), {
-			...sub,
-			transport
-		})
+		for(var sub of SUBS) {
+			await SUB_INST.post(ENDPOINTS.CREATE_SUBSCRIPTION(), {
+				...sub,
+				transport
+			})
+		}
+	} catch(e){
+		console.log(e.message, e.response?.data)
 	}
 }
 
@@ -203,4 +209,4 @@ client.on('hosted', (channel, username, viewers, autohost) => {
 setInterval(() => cleanProcessed(), 2 * 60 * 1000);
 subscribe();
 app.use(express.static(__dirname + '/assets'));
-app.listen(8080);
+app.listen(process.env.PORT || 8080);
