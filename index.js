@@ -8,13 +8,13 @@ const app = new express();
 app.use(express.json());
 
 const { Server } = require('socket.io');
-const { createServer } = require("http");
-const httpServer = createServer(app);
-const io = new Server(httpServer, {
+// const { createServer } = require("http");
+// const httpServer = createServer(app);
+const io = new Server(app.listen(process.env.PORT || 8080), {
 	cors: { origin: '*' }
 });
 const appNsp = io.of('/notifs');
-httpServer.listen(process.env.WS_PORT || 3000)
+// httpServer.listen(process.env.WS_PORT || 3000)
 
 io.on('connection', socket => {
 	socket.send("test");
@@ -215,4 +215,4 @@ client.on('hosted', (channel, username, viewers, autohost) => {
 setInterval(() => cleanProcessed(), 2 * 60 * 1000);
 subscribe();
 app.use(express.static(__dirname + '/assets'));
-app.listen(process.env.PORT || 8080);
+// app.listen(process.env.PORT || 8080);

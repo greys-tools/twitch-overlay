@@ -14,7 +14,7 @@
 		</div>
 	</div>
 	<script>
-		const socket = io(`http://localhost:%PORT%/notifs`);
+		const socket = io(`%CALLBACK%/notifs`);
 		const e_username = document.querySelector('#user-name');
 		const e_event = document.querySelector('#event-text');
 		const e_alertbox = document.querySelector('#alert-box');
