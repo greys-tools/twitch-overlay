@@ -1,0 +1,72 @@
+<head>
+	<script src="https://cdn.socket.io/4.4.0/socket.io.min.js" integrity="sha384-1fOn6VtTq3PWwfsOrk45LnYcGosJwzMHv+Xh/Jx5303FVOXzEnw0EpLv30mtjmlj" crossorigin="anonymous"></script>
+
+	<link rel="stylesheet" type="text/css" href="styles.css" />
+</head>
+<body>
+	<div id="wrapper">	
+		<div id="alert-box">
+			<img id="icon" src='follow.png'>
+			<div id="text">
+				<strong><span id="user-name"></span></strong>
+				<span id="event-text"></span>
+			</div>
+		</div>
+	</div>
+	<script>
+		const socket = io("http://localhost:3000/notifs");
+		const e_username = document.querySelector('#user-name');
+		const e_event = document.querySelector('#event-text');
+		const e_alertbox = document.querySelector('#alert-box');
+		socket.on('connect', () => {
+			socket.send('yote');
+		})
+
+		const SOUNDS = {
+			FOLLOW: new Audio('follow.wav'),
+			HOST: new Audio('host.wav'),
+			RAID: new Audio('raid.wav')
+		}
+
+		socket.on("message", data => {
+			if(data.type) {
+				switch(data.type) {
+					case 'channel.follow':
+						e_username.innerHTML = animate(data.event.user_name);
+						e_event.innerHTML = ' followed!';
+						SOUNDS.FOLLOW.play();
+						break;
+					case 'channel.raid':
+						e_username.innerHTML = animate(data.event.from_broadcaster_user_name);
+						e_event.innerHTML = 
+							'raided with<br><strong>' +
+							animate(data.event.viewers.toString()) +
+							"</strong> viewers!";
+						SOUNDS.RAID.play();
+						break;
+					case 'host':
+						e_username.innerHTML = animate(data.event.username);
+						e_event.innerHTML = 
+							'hosted with<br><strong>' +
+							animate(data.event.viewers.toString()) +
+							"</strong> viewers!";
+						SOUNDS.HOST.play();
+						break;
+				}
+				
+				e_alertbox.style.animation = 'show .5s forwards';
+				setTimeout(() => {
+					e_alertbox.style.animation = 'hide .5s forwards';
+				}, 4500)
+			}
+		});
+
+		function animate(s) {
+		    let arr = s.split('');
+		    arr = arr.map((l) => {
+		        return `<span class="animated-letter">${l}</span>`
+		    });
+		    return arr.join('');
+		}
+	</script>
+</body>
