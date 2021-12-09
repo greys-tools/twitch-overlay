@@ -13,7 +13,7 @@ const io = require('socket.io')(process.env.WS_PORT || 3000, {
 const appNsp = io.of('/notifs');
 
 io.on('connection', socket => {
-	socket.send("yeet");
+	socket.send("test");
 })
 
 const tmi = require('tmi.js');
@@ -146,7 +146,6 @@ async function getToken() {
 
 	try {
 		var req = await axios.post(`https://id.twitch.tv/oauth2/token?${query}`);
-		console.log(req.data);
 		var data = req.data;
 	} catch(e) {
 		console.log(e.config, e.message);
@@ -175,7 +174,6 @@ async function subscribe() {
 
 		var req = await SUB_INST.get(ENDPOINTS.GET_SUBSCRIPTIONS());
 		var existing = req.data;
-		console.log(existing);
 
 		for(var e of existing.data) {
 			if(e.status == 'enabled') continue;
