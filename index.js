@@ -7,10 +7,14 @@ const express = require('express');
 const app = new express();
 app.use(express.json());
 
-const io = require('socket.io')(process.env.WS_PORT || 3000, {
+const { Server } = require('socket.io');
+const { createServer } = require("http");
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
 	cors: { origin: '*' }
 });
 const appNsp = io.of('/notifs');
+httpServer.listen(process.env.WS_PORT || 3000)
 
 io.on('connection', socket => {
 	socket.send("test");
