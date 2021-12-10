@@ -8,6 +8,7 @@ body {
 
 #wrapper {
   position: absolute;
+  z-index: 1;
   left: 800px;
   top: 30px;
   width: 500px;
@@ -73,6 +74,11 @@ body {
 
 .animated-letter:nth-child(5n) {
   animation-delay: 0.4s;
+}
+
+.emote {
+  position: absolute;
+  z-index: 0;
 }
 
 @keyframes hide {

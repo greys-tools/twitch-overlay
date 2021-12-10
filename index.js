@@ -49,15 +49,17 @@ const SUBS = [
 	},
 ]
 
-let index = fs.readFileSync(__dirname + '/index.html', 'utf8')
-	.replace('%PORT%', process.env.WS_PORT || 3000)
-	.replace('%CALLBACK%', process.env.CALLBACK);
-
 const clientID = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
 const appSecret = process.env.APP_SECRET;
 const userID = process.env.USER_ID;
 const callbackURL = process.env.CALLBACK;
+const wsPort = process.env.WS_PORT || 3000;
+const nginx = parseInt(process.env.NGINX);
+
+let index = fs.readFileSync(__dirname + '/index.html', 'utf8');
+if(!nginx) index = index.replace('%WS_URL%', `${callbackURL}:${process.env.PORT}`);
+else index = index.replace('%WS_URL%', callbackURL);
 
 var processed = new Map();
 var queue = [];
@@ -195,6 +197,19 @@ async function subscribe() {
 }
 
 client.connect();
+client.on('message', (channel, state, message, self) => {
+	if(self) return;
+	if(!state['emote-only']) return;
+
+	appNsp.emit('message', {
+		id: 'emote',
+		type: 'emote',
+		event: {
+			emote: Object.keys(state.emotes)[0],
+			user: state.username
+		}
+	})
+});
 client.on('hosted', (channel, username, viewers, autohost) => {
 	queue.push({
 		id: 'hosting',

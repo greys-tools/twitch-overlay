@@ -1,5 +1,6 @@
 <head>
 	<script src="https://cdn.socket.io/4.4.0/socket.io.min.js" integrity="sha384-1fOn6VtTq3PWwfsOrk45LnYcGosJwzMHv+Xh/Jx5303FVOXzEnw0EpLv30mtjmlj" crossorigin="anonymous"></script>
+	<script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
 
 	<link rel="stylesheet" type="text/css" href="styles.css" />
 </head>
@@ -14,7 +15,10 @@
 		</div>
 	</div>
 	<script>
-		const socket = io(`%CALLBACK%/notifs`);
+		const emote_url = `https://static-cdn.jtvnw.net/emoticons/v2/:id/default/light/2.0`;
+		const wHeight = window.innerHeight;
+		const wWidth = window.innerWidth;
+		const socket = io(`%WS_URL%/notifs`);
 		const e_username = document.querySelector('#user-name');
 		const e_event = document.querySelector('#event-text');
 		const e_img = document.querySelector('#icon');
@@ -29,32 +33,40 @@
 			RAID: new Audio('raid.wav')
 		}
 
+		const emotes = new Set();
 		socket.on("message", data => {
 			if(data.type) {
 				switch(data.type) {
 					case 'channel.follow':
-						e_username.innerHTML = animate(data.event.user_name);
+						e_username.innerHTML = animateText(data.event.user_name);
 						e_event.innerHTML = ' followed!';
 						e_img.src = 'follow.png';
 						SOUNDS.FOLLOW.play();
 						break;
 					case 'channel.raid':
-						e_username.innerHTML = animate(data.event.from_broadcaster_user_name);
+						e_username.innerHTML = animateText(data.event.from_broadcaster_user_name);
 						e_event.innerHTML = 
 							'raided with<br><strong>' +
-							animate(data.event.viewers.toString()) +
+							animateText(data.event.viewers.toString()) +
 							"</strong> viewers!";
 						e_img.src = 'raid.png';
 						SOUNDS.RAID.play();
 						break;
 					case 'host':
-						e_username.innerHTML = animate(data.event.username);
+						e_username.innerHTML = animateText(data.event.username);
 						e_event.innerHTML = 
 							'hosted with<br><strong>' +
-							animate(data.event.viewers.toString()) +
+							animateText(data.event.viewers.toString()) +
 							"</strong> viewers!";
 						e_img.src = 'host.png';
 						SOUNDS.HOST.play();
+						break;
+					case 'emote':
+						var {user, emote} = data.event;
+						if(emotes.has(user)) return;
+						emotes.add(user);
+						animateEmoji(emote, user);
+						return;
 						break;
 				}
 				
@@ -65,12 +77,44 @@
 			}
 		});
 
-		function animate(s) {
+		function animateText(s) {
 		    let arr = s.split('');
 		    arr = arr.map((l) => {
 		        return `<span class="animated-letter">${l}</span>`
 		    });
 		    return arr.join('');
 		}
+
+		function animateEmoji(e, u) {
+			var src = emote_url.replace(':id', e);
+			var id = rand(0, 10000);
+			var start = {
+				left: rand(0, wWidth),
+				top: rand(0, wHeight)
+			}
+
+			var end = {
+				left: rand(0, wWidth),
+				top: rand(0, wHeight),
+				opacity: 0
+			}
+
+			console.log(start, end)
+
+			var em = document.createElement('img');
+			em.src = src;
+			em.id = `emote-${id}`;
+			em.classList.add('emote');
+			em.style.left = start.left;
+			em.style.top = start.top;
+			document.body.appendChild(em);
+
+			$(`#emote-${id}`).animate(end, 1000, function() {
+				em.remove();
+				emotes.delete(u);
+			})
+		}
+
+		function rand(min, max) { return Math.floor(Math.random() * (max - min) + min); }
 	</script>
 </body>
