@@ -47,6 +47,34 @@ const SUBS = [
 			to_broadcaster_user_id: process.env.USER_ID
 		}
 	},
+	{
+		type: 'channel.subscribe',
+		version: 1,
+		condition: {
+			broadcaster_user_id: process.env.USER_ID
+		}
+	},
+	{
+		type: 'channel.subscription.gift',
+		version: 1,
+		condition: {
+			broadcaster_user_id: process.env.USER_ID
+		}
+	},
+	{
+		type: 'channel.subscription.message',
+		version: 1,
+		condition: {
+			broadcaster_user_id: process.env.USER_ID
+		}
+	},
+	{
+		type: 'channel.cheer',
+		version: 1,
+		condition: {
+			broadcaster_user_id: process.env.USER_ID
+		}
+	},
 ]
 
 const clientID = process.env.CLIENT_ID;

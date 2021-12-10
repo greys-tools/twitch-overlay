@@ -175,7 +175,11 @@
 		const SOUNDS = {
 			FOLLOW: new Audio('follow.wav'),
 			HOST: new Audio('host.wav'),
-			RAID: new Audio('raid.wav')
+			RAID: new Audio('raid.wav'),
+			SUB: new Audio('sub.wav'),
+			SUB_GIFT: new Audio('sub_gift.wav'),
+			RESUB: new Audio('resub.wav'),
+			CHEER: new Audio('cheer.wav'),
 		}
 
 		const emotes = new Set();
@@ -205,6 +209,48 @@
 							"</strong> viewers!";
 						e_img.src = 'host.png';
 						SOUNDS.HOST.play();
+						break;
+					case 'channel.subscribe':
+						e_username.innerHTML = animateText(data.event.user_name);
+						e_event.innerHTML = 
+							'subbed at <br>tier <strong>' +
+							animateText((data.event.tier / 1000).toString()) +
+							"</strong>!";
+						e_img.src = 'sub.png';
+						SOUNDS.SUB.play();
+						break;
+					case 'channel.subscription.gift':
+						e_username.innerHTML = animateText(
+							data.event.user_name ??
+							"Anonymous"
+						);
+						e_event.innerHTML = 
+							'gifted<br><strong>' +
+							animateText(data.event.total.toString()) +
+							"</strong> subs!";
+						e_img.src = 'sub_gift.png';
+						SOUNDS.SUB_GIFT.play();
+						break;
+					case 'channel.subscription.message':
+						e_username.innerHTML = animateText(data.event.user_name);
+						e_event.innerHTML = 
+							'resubbed for<br><strong>' +
+							animateText(data.event.duration_months.toString()) +
+							"</strong> months!";
+						e_img.src = 'resub.png';
+						SOUNDS.RESUB.play();
+						break;
+					case 'channel.cheer':
+						e_username.innerHTML = animateText(
+							data.event.user_name ??
+							"Anonymous"
+						);
+						e_event.innerHTML = 
+							'cheered for<br><strong>' +
+							animateText(data.event.bits.toString()) +
+							"</strong> bits!";
+						e_img.src = 'cheer.png';
+						SOUNDS.CHEER.play();
 						break;
 					case 'emote':
 						var {user, emote} = data.event;
