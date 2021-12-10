@@ -6,7 +6,7 @@
 <body>
 	<div id="wrapper">	
 		<div id="alert-box">
-			<img id="icon" src='follow.png'>
+			<img id="icon" src=''>
 			<div id="text">
 				<strong><span id="user-name"></span></strong>
 				<span id="event-text"></span>
@@ -17,6 +17,7 @@
 		const socket = io(`%CALLBACK%/notifs`);
 		const e_username = document.querySelector('#user-name');
 		const e_event = document.querySelector('#event-text');
+		const e_img = document.querySelector('#icon');
 		const e_alertbox = document.querySelector('#alert-box');
 		socket.on('connect', () => {
 			socket.send('yote');
@@ -34,6 +35,7 @@
 					case 'channel.follow':
 						e_username.innerHTML = animate(data.event.user_name);
 						e_event.innerHTML = ' followed!';
+						e_img.src = 'follow.png';
 						SOUNDS.FOLLOW.play();
 						break;
 					case 'channel.raid':
@@ -42,6 +44,7 @@
 							'raided with<br><strong>' +
 							animate(data.event.viewers.toString()) +
 							"</strong> viewers!";
+						e_img.src = 'raid.png';
 						SOUNDS.RAID.play();
 						break;
 					case 'host':
@@ -50,6 +53,7 @@
 							'hosted with<br><strong>' +
 							animate(data.event.viewers.toString()) +
 							"</strong> viewers!";
+						e_img.src = 'host.png';
 						SOUNDS.HOST.play();
 						break;
 				}
