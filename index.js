@@ -212,7 +212,7 @@ async function subscribe() {
 		}
 
 		for(var sub of SUBS) {
-			if(existing.data.find(s => s.type == sub.type && s.status !== "enabled")) {
+			if(!existing.data.find(s => s.type == sub.type && s.status == "enabled")) {
 				await SUB_INST.post(ENDPOINTS.CREATE_SUBSCRIPTION(), {
 					...sub,
 					transport
