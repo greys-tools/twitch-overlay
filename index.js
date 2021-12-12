@@ -118,7 +118,7 @@ function cleanProcessed() {
 }
 
 function verify (req, res, next) {
-	// if(!verifyHash(req.headers, req.body)) return res.status(403).send();
+	if(!verifyHash(req.headers, req.body)) return res.status(403).send();
 	next();
 }
 
@@ -266,5 +266,5 @@ client.on('hosted', (channel, username, viewers, autohost) => {
 })
 
 setInterval(() => cleanProcessed(), 2 * 60 * 1000);
-// subscribe();
+subscribe();
 app.use(express.static(__dirname + '/assets'));
