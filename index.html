@@ -180,6 +180,20 @@
 			SUB_GIFT: new Audio('sub_gift.wav'),
 			RESUB: new Audio('resub.wav'),
 			CHEER: new Audio('cheer.wav'),
+			GOAL_PROGRESS: new Audio('goal_progress.wav'),
+			GOAL_END: new Audio('goal_end.wav'),
+		}
+
+		const IMAGES = {
+			FOLLOW: 'follow.png',
+			HOST: 'host.png',
+			RAID: 'raid.png',
+			SUB: 'sub.png',
+			SUB_GIFT: 'sub_gift.png',
+			RESUB: 'resub.png',
+			CHEER: 'cheer.png',
+			GOAL_PROGRESS: 'goal_progress.png',
+			GOAL_END: 'goal_end.png',
 		}
 
 		const emotes = new Set();
@@ -189,7 +203,7 @@
 					case 'channel.follow':
 						e_username.innerHTML = animateText(data.event.user_name);
 						e_event.innerHTML = ' followed!';
-						e_img.src = 'follow.png';
+						e_img.src = IMAGES.FOLLOW;
 						SOUNDS.FOLLOW.play();
 						break;
 					case 'channel.raid':
@@ -198,7 +212,7 @@
 							'raided with<br><strong>' +
 							animateText(data.event.viewers.toString()) +
 							"</strong> viewers!";
-						e_img.src = 'raid.png';
+						e_img.src = IMAGES.RAID;
 						SOUNDS.RAID.play();
 						break;
 					case 'host':
@@ -207,7 +221,7 @@
 							'hosted with<br><strong>' +
 							animateText(data.event.viewers.toString()) +
 							"</strong> viewers!";
-						e_img.src = 'host.png';
+						e_img.src = IMAGES.HOST;
 						SOUNDS.HOST.play();
 						break;
 					case 'channel.subscribe':
@@ -216,7 +230,7 @@
 							'subbed at <br>tier <strong>' +
 							animateText((data.event.tier / 1000).toString()) +
 							"</strong>!";
-						e_img.src = 'sub.png';
+						e_img.src = IMAGES.SUB;
 						SOUNDS.SUB.play();
 						break;
 					case 'channel.subscription.gift':
@@ -228,7 +242,7 @@
 							'gifted<br><strong>' +
 							animateText(data.event.total.toString()) +
 							"</strong> subs!";
-						e_img.src = 'sub_gift.png';
+						e_img.src = IMAGES.SUB_GIFT;
 						SOUNDS.SUB_GIFT.play();
 						break;
 					case 'channel.subscription.message':
@@ -237,7 +251,7 @@
 							'resubbed for<br><strong>' +
 							animateText(data.event.duration_months.toString()) +
 							"</strong> months!";
-						e_img.src = 'resub.png';
+						e_img.src = IMAGES.RESUB;
 						SOUNDS.RESUB.play();
 						break;
 					case 'channel.cheer':
@@ -249,8 +263,25 @@
 							'cheered for<br><strong>' +
 							animateText(data.event.bits.toString()) +
 							"</strong> bits!";
-						e_img.src = 'cheer.png';
+						e_img.src = IMAGES.CHEER;
 						SOUNDS.CHEER.play();
+						break;
+					case 'channel.goal.progress':
+						e_username.innerHTML = animateText(data.event.type.slice(0, -1));
+						e_event.innerHTML = 
+							'goal progress!<br><strong>' +
+							animateText(data.event.current_amount.toString()) +
+							`</strong> out of ` +
+							`<strong>${data.event.target_amount.toString()}!</strong>`;
+						e_img.src = IMAGES.GOAL_PROGRESS;
+						SOUNDS.GOAL_PROGRESS.play();
+						break;
+					case 'channel.goal.end':
+						if(!data.event.is_achieved) return;
+						e_username.innerHTML = animateText(data.event.type.slice(0, -1));
+						e_event.innerHTML = 'goal <strong>completed!</strong>'; 
+						e_img.src = IMAGES.GOAL_END;
+						SOUNDS.GOAL_END.play();
 						break;
 					case 'emote':
 						var {user, emote} = data.event;
