@@ -7,13 +7,19 @@ The following alert types are handled:
 - Follows
 - Raids
 - Hosts
+- Subscriptions
+- Resubs
+- Sub gifts
+- Cheers
+- Goal progress
+- Goal end
 
 Multiple events in a row are queued up, so no need to worry about missing one if another happens immediately after! Also, they should be on the screen for about 5 seconds
 
 ## Emotes
 Emotes pop up in a random spot on the screen and shoot off to another spot while fading away. Currently only one emoji per user can be seen on the screen at a time; once that emoji has disappeared, another can be shown by the same user again. Emojis from different users shouldn't be hindered at all
 
-**More TBA**, we're planning on changing up emotes to have a configurable per-user limit as well as adding events for subscriptions, cheers, and goals
+**More TBA**, we're planning on changing up emotes to have a configurable per-user limit at the very least
 
 # Self Hosting
 ## Requirements
