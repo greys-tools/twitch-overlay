@@ -22,12 +22,16 @@ Emotes pop up in a random spot on the screen and shoot off to another spot while
 **More TBA**, we're planning on changing up emotes to have a configurable per-user limit at the very least
 
 # Self Hosting
-## Requirements
-- NodeJS 14.x or higher
+## REPL.IT
+If you'd like to use Repl.it for hosting, you can fork [this repl](https://replit.com/@GreyHimmel/twitch-alerts), create and populate the required env variables, and then you're good to go!
+
+## VPS
+### Requirements
+- NodeJS 12.x or higher
 - An account for chat access (your broadcaster account works, though you can also make an alt)
 - A Twitch [dev app](https://dev.twitch.com)
 
-## Environment
+### Environment
 The current `example.env` looks like this:
 ```bash
 CLIENT_ID=abcdefgh
@@ -51,7 +55,7 @@ NGINX=0 # using nginx? change this to 1
 
 This app uses socket.io for communicating between the frontend and backend, which NginX has some issues with. If you're using NginX on your host, try using [these docs](https://socket.io/docs/v4/reverse-proxy/) to configure it for use with socket.io. Unfortunately, **we can't provide support for that aspect.** If it works in development, but not in production, chances are it's an issue with NginX and we're not entirely sure how we managed to fix our problem to start with 😔
 
-## Steps
+### Steps
 1. Clone this repo to your host
 2. Copy the `example.env`, rename to `.env`, and supply the correct info
 3. Run `npm install` to install dependencies
@@ -64,7 +68,7 @@ If you have an alt account, you can test that it's working by following your mai
 
 \* = **NOTE:** Sometimes sounds won't play at first if you're looking at it in an actual browser- you have to "interact" with the page first (try clicking in the blank space). This isn't a problem for browser sources, thankfully
 
-## Support
+# Support
 If you need support, feel free to open an issue! However, please note that we *can not* provide support related to socket.io or NginX issues- we can only help if something directly related to the program breaks
 
 If you'd like to support *us*, we've got a [Patreon](https://patreon.com/greysdawn) and a [Ko-Fi](https://ko-fi.com/greysdawn) you can chuck some money at, if you're interested. No pressure though 💜
