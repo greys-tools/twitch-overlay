@@ -23,7 +23,8 @@ Emotes pop up in a random spot on the screen and shoot off to another spot while
 
 # Self Hosting
 ## REPL.IT
-If you'd like to use Repl.it for hosting, you can fork [this repl](https://replit.com/@GreyHimmel/twitch-alerts), create and populate the required env variables, and then you're good to go!
+If you'd like to use Repl.it for hosting, you can fork [this repl](https://replit.com/@GreyHimmel/twitch-alerts), create and populate the required env variables, and then you're good to go!  
+You'll probably want to use [uptime robot](https://uptimerobot.com/) to keep your repl alive
 
 ## VPS
 ### Requirements
