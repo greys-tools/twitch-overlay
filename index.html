@@ -224,7 +224,7 @@
 							break;
 						case 'channel.subscription.gift':
 							e_username.innerHTML = animateText(
-								data.event.user_name ??
+								data.event.user_name ||
 								"Anonymous"
 							);
 							e_event.innerHTML = 
@@ -245,7 +245,7 @@
 							break;
 						case 'channel.cheer':
 							e_username.innerHTML = animateText(
-								data.event.user_name ??
+								data.event.user_name ||
 								"Anonymous"
 							);
 							e_event.innerHTML = 
