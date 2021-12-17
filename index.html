@@ -174,8 +174,9 @@
 			GOAL_END: 'goal_end.png',
 		}
 
+		const emote_url = `https://static-cdn.jtvnw.net/emoticons/v2/:id/default/light/2.0`;
+
 		$( document ).ready(function() {
-			const emote_url = `https://static-cdn.jtvnw.net/emoticons/v2/:id/default/light/2.0`;
 			const wHeight = window.innerHeight;
 			const wWidth = window.innerWidth;
 			const socket = io(`%WS_URL%/notifs`);
