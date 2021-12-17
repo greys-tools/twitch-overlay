@@ -14,10 +14,10 @@
 		#wrapper {
 		  position: absolute;
 		  z-index: 1;
-		  left: 800px;
+		  left: calc(100vw - 500px);
 		  top: 30px;
 		  width: 500px;
-		  height: 105px;
+		  height: 100px;
 		  text-align: left;
 		  overflow: hidden;
 		}
@@ -26,9 +26,10 @@
 		  background-color: rgba(20, 20, 20, 1);
 		  position: relative;
 		  left: 100%;
-		  border-radius: 10px;
+		  border-bottom-left-radius: 10px;
+		  border-top-left-radius: 10px;
 		  margin: auto;
-		  height: 105px;
+		  height: 100px;
 		  display: grid;
 		  grid-template-areas: "avatar text";
 		  grid-template-columns: .25fr 1fr;
@@ -172,12 +173,12 @@
 			GOAL_PROGRESS: 'goal_progress.png',
 			GOAL_END: 'goal_end.png',
 		}
+
 		$( document ).ready(function() {
 			const emote_url = `https://static-cdn.jtvnw.net/emoticons/v2/:id/default/light/2.0`;
 			const wHeight = window.innerHeight;
 			const wWidth = window.innerWidth;
 			const socket = io(`%WS_URL%/notifs`);
-			const e_username = document.querySelector('#user-name');
 			const e_event = document.querySelector('#event-text');
 			const e_img = document.querySelector('#icon');
 			const e_alertbox = document.querySelector('#alert-box');
@@ -190,75 +191,68 @@
 				if(data.type) {
 					switch(data.type) {
 						case 'channel.follow':
-							e_username.innerHTML = animateText(data.event.user_name);
-							e_event.innerHTML = ' followed!';
+							e_event.innerHTML = `${animateText(data.event.user_name)} followed!`;
 							e_img.src = IMAGES.FOLLOW;
 							SOUNDS.FOLLOW.play();
 							break;
 						case 'channel.raid':
-							e_username.innerHTML = animateText(data.event.from_broadcaster_user_name);
 							e_event.innerHTML = 
-								'raided with<br><strong>' +
+								animateText(data.event.from_broadcaster_user_name) +
+								' raided with<br><strong>' +
 								animateText(data.event.viewers.toString()) +
 								"</strong> viewers!";
 							e_img.src = IMAGES.RAID;
 							SOUNDS.RAID.play();
 							break;
 						case 'host':
-							e_username.innerHTML = animateText(data.event.username);
 							e_event.innerHTML = 
-								'hosted with<br><strong>' +
+								animateText(data.event.username) +
+								' hosted with<br><strong>' +
 								animateText(data.event.viewers.toString()) +
 								"</strong> viewers!";
 							e_img.src = IMAGES.HOST;
 							SOUNDS.HOST.play();
 							break;
 						case 'channel.subscribe':
-							e_username.innerHTML = animateText(data.event.user_name);
 							e_event.innerHTML = 
-								'subbed at <br>tier <strong>' +
+								animateText(data.event.user_name) +
+								' subbed at <br>tier <strong>' +
 								animateText((data.event.tier / 1000).toString()) +
 								"</strong>!";
 							e_img.src = IMAGES.SUB;
 							SOUNDS.SUB.play();
 							break;
 						case 'channel.subscription.gift':
-							e_username.innerHTML = animateText(
-								data.event.user_name ||
-								"Anonymous"
-							);
 							e_event.innerHTML = 
-								'gifted<br><strong>' +
+								animateText(data.event.user_name || "Anonymous") +
+								' gifted<br><strong>' +
 								animateText(data.event.total.toString()) +
 								"</strong> subs!";
 							e_img.src = IMAGES.SUB_GIFT;
 							SOUNDS.SUB_GIFT.play();
 							break;
 						case 'channel.subscription.message':
-							e_username.innerHTML = animateText(data.event.user_name);
 							e_event.innerHTML = 
-								'resubbed for<br><strong>' +
+								animateText(data.event.user_name) +
+								' resubbed for<br><strong>' +
 								animateText(data.event.duration_months.toString()) +
 								"</strong> months!";
 							e_img.src = IMAGES.RESUB;
 							SOUNDS.RESUB.play();
 							break;
 						case 'channel.cheer':
-							e_username.innerHTML = animateText(
-								data.event.user_name ||
-								"Anonymous"
-							);
 							e_event.innerHTML = 
-								'cheered for<br><strong>' +
+								animateText(data.event.user_name || "Anonymous") +
+								' cheered for<br><strong>' +
 								animateText(data.event.bits.toString()) +
 								"</strong> bits!";
 							e_img.src = IMAGES.CHEER;
 							SOUNDS.CHEER.play();
 							break;
 						case 'channel.goal.progress':
-							e_username.innerHTML = animateText(data.event.type.slice(0, -1));
 							e_event.innerHTML = 
-								'goal progress!<br><strong>' +
+								animateText(data.event.type.slice(0, -1)) +
+								' goal progress!<br><strong>' +
 								animateText(data.event.current_amount.toString()) +
 								`</strong> out of ` +
 								`<strong>${data.event.target_amount.toString()}!</strong>`;
@@ -267,8 +261,7 @@
 							break;
 						case 'channel.goal.end':
 							if(!data.event.is_achieved) return;
-							e_username.innerHTML = animateText(data.event.type.slice(0, -1));
-							e_event.innerHTML = 'goal <strong>completed!</strong>'; 
+							e_event.innerHTML = `${animateText(data.event.type.slice(0, -1))} goal <strong>completed!</strong>`; 
 							e_img.src = IMAGES.GOAL_END;
 							SOUNDS.GOAL_END.play();
 							break;
@@ -294,7 +287,7 @@
 		    arr = arr.map((l) => {
 		        return `<span class="animated-letter">${l}</span>`
 		    });
-		    return arr.join('');
+		    return `<strong>${arr.join('')}</strong>`;
 		}
 
 		function animateEmoji(e, u) {
@@ -335,7 +328,6 @@
 		<div id="alert-box">
 			<img id="icon" src=''>
 			<div id="text">
-				<strong><span id="user-name"></span></strong>
 				<span id="event-text"></span>
 			</div>
 		</div>

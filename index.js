@@ -98,6 +98,7 @@ const userID = process.env.USER_ID;
 const callbackURL = process.env.CALLBACK;
 const wsPort = process.env.WS_PORT || 3000;
 const nginx = parseInt(process.env.NGINX);
+const resolution = process.env.RESOLUTION;
 
 let index = fs.readFileSync(__dirname + '/index.html', 'utf8');
 if(!nginx) index = index.replace('%WS_URL%', `${callbackURL}:${process.env.PORT}`);
