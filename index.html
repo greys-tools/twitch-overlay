@@ -1,197 +1,7 @@
 <head>
 	<script src="https://cdn.socket.io/4.4.0/socket.io.min.js" integrity="sha384-1fOn6VtTq3PWwfsOrk45LnYcGosJwzMHv+Xh/Jx5303FVOXzEnw0EpLv30mtjmlj" crossorigin="anonymous"></script>
 	<script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
-</head>
-<body>
-	<div id="wrapper">	
-		<div id="alert-box">
-			<img id="icon" src=''>
-			<div id="text">
-				<strong><span id="user-name"></span></strong>
-				<span id="event-text"></span>
-			</div>
-		</div>
-	</div>
-	<script>
-		const emote_url = `https://static-cdn.jtvnw.net/emoticons/v2/:id/default/light/2.0`;
-		const wHeight = window.innerHeight;
-		const wWidth = window.innerWidth;
-		const socket = io(`%WS_URL%/notifs`);
-		const e_username = document.querySelector('#user-name');
-		const e_event = document.querySelector('#event-text');
-		const e_img = document.querySelector('#icon');
-		const e_alertbox = document.querySelector('#alert-box');
-		socket.on('connect', () => {
-			socket.send('yote');
-		})
 
-		const SOUNDS = {
-			FOLLOW: new Audio('follow.wav'),
-			HOST: new Audio('host.wav'),
-			RAID: new Audio('raid.wav'),
-			SUB: new Audio('sub.wav'),
-			SUB_GIFT: new Audio('sub_gift.wav'),
-			RESUB: new Audio('resub.wav'),
-			CHEER: new Audio('cheer.wav'),
-			GOAL_PROGRESS: new Audio('goal_progress.wav'),
-			GOAL_END: new Audio('goal_end.wav'),
-		}
-
-		const IMAGES = {
-			FOLLOW: 'follow.png',
-			HOST: 'host.png',
-			RAID: 'raid.png',
-			SUB: 'sub.png',
-			SUB_GIFT: 'sub_gift.png',
-			RESUB: 'resub.png',
-			CHEER: 'cheer.png',
-			GOAL_PROGRESS: 'goal_progress.png',
-			GOAL_END: 'goal_end.png',
-		}
-
-		const emotes = new Set();
-		socket.on("message", data => {
-			if(data.type) {
-				switch(data.type) {
-					case 'channel.follow':
-						e_username.innerHTML = animateText(data.event.user_name);
-						e_event.innerHTML = ' followed!';
-						e_img.src = IMAGES.FOLLOW;
-						SOUNDS.FOLLOW.play();
-						break;
-					case 'channel.raid':
-						e_username.innerHTML = animateText(data.event.from_broadcaster_user_name);
-						e_event.innerHTML = 
-							'raided with<br><strong>' +
-							animateText(data.event.viewers.toString()) +
-							"</strong> viewers!";
-						e_img.src = IMAGES.RAID;
-						SOUNDS.RAID.play();
-						break;
-					case 'host':
-						e_username.innerHTML = animateText(data.event.username);
-						e_event.innerHTML = 
-							'hosted with<br><strong>' +
-							animateText(data.event.viewers.toString()) +
-							"</strong> viewers!";
-						e_img.src = IMAGES.HOST;
-						SOUNDS.HOST.play();
-						break;
-					case 'channel.subscribe':
-						e_username.innerHTML = animateText(data.event.user_name);
-						e_event.innerHTML = 
-							'subbed at <br>tier <strong>' +
-							animateText((data.event.tier / 1000).toString()) +
-							"</strong>!";
-						e_img.src = IMAGES.SUB;
-						SOUNDS.SUB.play();
-						break;
-					case 'channel.subscription.gift':
-						e_username.innerHTML = animateText(
-							data.event.user_name ??
-							"Anonymous"
-						);
-						e_event.innerHTML = 
-							'gifted<br><strong>' +
-							animateText(data.event.total.toString()) +
-							"</strong> subs!";
-						e_img.src = IMAGES.SUB_GIFT;
-						SOUNDS.SUB_GIFT.play();
-						break;
-					case 'channel.subscription.message':
-						e_username.innerHTML = animateText(data.event.user_name);
-						e_event.innerHTML = 
-							'resubbed for<br><strong>' +
-							animateText(data.event.duration_months.toString()) +
-							"</strong> months!";
-						e_img.src = IMAGES.RESUB;
-						SOUNDS.RESUB.play();
-						break;
-					case 'channel.cheer':
-						e_username.innerHTML = animateText(
-							data.event.user_name ??
-							"Anonymous"
-						);
-						e_event.innerHTML = 
-							'cheered for<br><strong>' +
-							animateText(data.event.bits.toString()) +
-							"</strong> bits!";
-						e_img.src = IMAGES.CHEER;
-						SOUNDS.CHEER.play();
-						break;
-					case 'channel.goal.progress':
-						e_username.innerHTML = animateText(data.event.type.slice(0, -1));
-						e_event.innerHTML = 
-							'goal progress!<br><strong>' +
-							animateText(data.event.current_amount.toString()) +
-							`</strong> out of ` +
-							`<strong>${data.event.target_amount.toString()}!</strong>`;
-						e_img.src = IMAGES.GOAL_PROGRESS;
-						SOUNDS.GOAL_PROGRESS.play();
-						break;
-					case 'channel.goal.end':
-						if(!data.event.is_achieved) return;
-						e_username.innerHTML = animateText(data.event.type.slice(0, -1));
-						e_event.innerHTML = 'goal <strong>completed!</strong>'; 
-						e_img.src = IMAGES.GOAL_END;
-						SOUNDS.GOAL_END.play();
-						break;
-					case 'emote':
-						var {user, emote} = data.event;
-						if(emotes.has(user)) return;
-						emotes.add(user);
-						animateEmoji(emote, user);
-						return;
-						break;
-				}
-				
-				e_alertbox.style.animation = 'show .5s forwards';
-				setTimeout(() => {
-					e_alertbox.style.animation = 'hide .5s forwards';
-				}, 4500)
-			}
-		});
-
-		function animateText(s) {
-		    let arr = s.split('');
-		    arr = arr.map((l) => {
-		        return `<span class="animated-letter">${l}</span>`
-		    });
-		    return arr.join('');
-		}
-
-		function animateEmoji(e, u) {
-			var src = emote_url.replace(':id', e);
-			var id = rand(0, 10000);
-			var start = {
-				left: rand(0, wWidth),
-				top: rand(0, wHeight)
-			}
-
-			var end = {
-				left: rand(0, wWidth),
-				top: rand(0, wHeight),
-				opacity: 0
-			}
-
-			console.log(start, end)
-
-			var em = document.createElement('img');
-			em.src = src;
-			em.id = `emote-${id}`;
-			em.classList.add('emote');
-			em.style.left = start.left;
-			em.style.top = start.top;
-			document.body.appendChild(em);
-
-			$(`#emote-${id}`).animate(end, 1000, function() {
-				em.remove();
-				emotes.delete(u);
-			})
-		}
-
-		function rand(min, max) { return Math.floor(Math.random() * (max - min) + min); }
-	</script>
 	<style>
 		@import url('https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300&display=swap');
 
@@ -338,4 +148,196 @@
 		  }
 		}
 	</style>
+	<script>
+		const SOUNDS = {
+			FOLLOW: new Audio('follow.wav'),
+			HOST: new Audio('host.wav'),
+			RAID: new Audio('raid.wav'),
+			SUB: new Audio('sub.wav'),
+			SUB_GIFT: new Audio('sub_gift.wav'),
+			RESUB: new Audio('resub.wav'),
+			CHEER: new Audio('cheer.wav'),
+			GOAL_PROGRESS: new Audio('goal_progress.wav'),
+			GOAL_END: new Audio('goal_end.wav'),
+		}
+
+		const IMAGES = {
+			FOLLOW: 'follow.png',
+			HOST: 'host.png',
+			RAID: 'raid.png',
+			SUB: 'sub.png',
+			SUB_GIFT: 'sub_gift.png',
+			RESUB: 'resub.png',
+			CHEER: 'cheer.png',
+			GOAL_PROGRESS: 'goal_progress.png',
+			GOAL_END: 'goal_end.png',
+		}
+		$( document ).ready(function() {
+			const emote_url = `https://static-cdn.jtvnw.net/emoticons/v2/:id/default/light/2.0`;
+			const wHeight = window.innerHeight;
+			const wWidth = window.innerWidth;
+			const socket = io(`%WS_URL%/notifs`);
+			const e_username = document.querySelector('#user-name');
+			const e_event = document.querySelector('#event-text');
+			const e_img = document.querySelector('#icon');
+			const e_alertbox = document.querySelector('#alert-box');
+			socket.on('connect', () => {
+				socket.send('yote');
+			})
+
+			const emotes = new Set();
+			socket.on("message", data => {
+				if(data.type) {
+					switch(data.type) {
+						case 'channel.follow':
+							e_username.innerHTML = animateText(data.event.user_name);
+							e_event.innerHTML = ' followed!';
+							e_img.src = IMAGES.FOLLOW;
+							SOUNDS.FOLLOW.play();
+							break;
+						case 'channel.raid':
+							e_username.innerHTML = animateText(data.event.from_broadcaster_user_name);
+							e_event.innerHTML = 
+								'raided with<br><strong>' +
+								animateText(data.event.viewers.toString()) +
+								"</strong> viewers!";
+							e_img.src = IMAGES.RAID;
+							SOUNDS.RAID.play();
+							break;
+						case 'host':
+							e_username.innerHTML = animateText(data.event.username);
+							e_event.innerHTML = 
+								'hosted with<br><strong>' +
+								animateText(data.event.viewers.toString()) +
+								"</strong> viewers!";
+							e_img.src = IMAGES.HOST;
+							SOUNDS.HOST.play();
+							break;
+						case 'channel.subscribe':
+							e_username.innerHTML = animateText(data.event.user_name);
+							e_event.innerHTML = 
+								'subbed at <br>tier <strong>' +
+								animateText((data.event.tier / 1000).toString()) +
+								"</strong>!";
+							e_img.src = IMAGES.SUB;
+							SOUNDS.SUB.play();
+							break;
+						case 'channel.subscription.gift':
+							e_username.innerHTML = animateText(
+								data.event.user_name ??
+								"Anonymous"
+							);
+							e_event.innerHTML = 
+								'gifted<br><strong>' +
+								animateText(data.event.total.toString()) +
+								"</strong> subs!";
+							e_img.src = IMAGES.SUB_GIFT;
+							SOUNDS.SUB_GIFT.play();
+							break;
+						case 'channel.subscription.message':
+							e_username.innerHTML = animateText(data.event.user_name);
+							e_event.innerHTML = 
+								'resubbed for<br><strong>' +
+								animateText(data.event.duration_months.toString()) +
+								"</strong> months!";
+							e_img.src = IMAGES.RESUB;
+							SOUNDS.RESUB.play();
+							break;
+						case 'channel.cheer':
+							e_username.innerHTML = animateText(
+								data.event.user_name ??
+								"Anonymous"
+							);
+							e_event.innerHTML = 
+								'cheered for<br><strong>' +
+								animateText(data.event.bits.toString()) +
+								"</strong> bits!";
+							e_img.src = IMAGES.CHEER;
+							SOUNDS.CHEER.play();
+							break;
+						case 'channel.goal.progress':
+							e_username.innerHTML = animateText(data.event.type.slice(0, -1));
+							e_event.innerHTML = 
+								'goal progress!<br><strong>' +
+								animateText(data.event.current_amount.toString()) +
+								`</strong> out of ` +
+								`<strong>${data.event.target_amount.toString()}!</strong>`;
+							e_img.src = IMAGES.GOAL_PROGRESS;
+							SOUNDS.GOAL_PROGRESS.play();
+							break;
+						case 'channel.goal.end':
+							if(!data.event.is_achieved) return;
+							e_username.innerHTML = animateText(data.event.type.slice(0, -1));
+							e_event.innerHTML = 'goal <strong>completed!</strong>'; 
+							e_img.src = IMAGES.GOAL_END;
+							SOUNDS.GOAL_END.play();
+							break;
+						case 'emote':
+							var {user, emote} = data.event;
+							if(emotes.has(user)) return;
+							emotes.add(user);
+							animateEmoji(emote, user);
+							return;
+							break;
+					}
+					
+					e_alertbox.style.animation = 'show .5s forwards';
+					setTimeout(() => {
+						e_alertbox.style.animation = 'hide .5s forwards';
+					}, 4500)
+				}
+			});
+		})
+		
+		function animateText(s) {
+		    let arr = s.split('');
+		    arr = arr.map((l) => {
+		        return `<span class="animated-letter">${l}</span>`
+		    });
+		    return arr.join('');
+		}
+
+		function animateEmoji(e, u) {
+			var src = emote_url.replace(':id', e);
+			var id = rand(0, 10000);
+			var start = {
+				left: rand(0, wWidth),
+				top: rand(0, wHeight)
+			}
+
+			var end = {
+				left: rand(0, wWidth),
+				top: rand(0, wHeight),
+				opacity: 0
+			}
+
+			console.log(start, end)
+
+			var em = document.createElement('img');
+			em.src = src;
+			em.id = `emote-${id}`;
+			em.classList.add('emote');
+			em.style.left = start.left;
+			em.style.top = start.top;
+			document.body.appendChild(em);
+
+			$(`#emote-${id}`).animate(end, 1000, function() {
+				em.remove();
+				emotes.delete(u);
+			})
+		}
+
+		function rand(min, max) { return Math.floor(Math.random() * (max - min) + min); }
+	</script>
+</head>
+<body>
+	<div id="wrapper">	
+		<div id="alert-box">
+			<img id="icon" src=''>
+			<div id="text">
+				<strong><span id="user-name"></span></strong>
+				<span id="event-text"></span>
+			</div>
+		</div>
+	</div>
 </body>
