@@ -1,153 +1,6 @@
 <head>
 	<script src="https://cdn.socket.io/4.4.0/socket.io.min.js" integrity="sha384-1fOn6VtTq3PWwfsOrk45LnYcGosJwzMHv+Xh/Jx5303FVOXzEnw0EpLv30mtjmlj" crossorigin="anonymous"></script>
 	<script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
-
-	<style>
-		@import url('https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300&display=swap');
-
-		body {
-			font-family: 'Readex Pro', sans-serif;
-		  color: white;
-		  font-size: 26px;
-		}
-
-		#wrapper {
-		  position: absolute;
-		  z-index: 1;
-		  left: 800px;
-		  top: 30px;
-		  width: 500px;
-		  height: 105px;
-		  text-align: left;
-		  overflow: hidden;
-		}
-
-		#alert-box {
-		  background-color: rgba(20, 20, 20, 1);
-		  position: relative;
-		  left: 100%;
-		  border-radius: 10px;
-		  margin: auto;
-		  height: 105px;
-		  display: grid;
-		  grid-template-areas: "avatar text";
-		  grid-template-columns: .25fr 1fr;
-		  grid-template-rows: 1fr;
-		  justify-content: center;
-		  align-content: center;
-		  align-items: center;
-		}
-
-		#icon {
-			width: 80px;
-			height: auto;
-		  grid-area: avatar;
-		  margin: auto;
-		  position: relative;
-		  animation: icon-bounce .5s infinite;
-		}
-
-		#text {
-		  grid-area: text;
-		}
-
-		.animated-letter {
-		  animation-name: text-bounce;
-		  animation-duration: .5s;
-		  animation-iteration-count: infinite;
-		  display: inline-block;
-		  animation-fill-mode: both;
-		  color: #aa55aa;
-		  position: relative;
-		}
-
-		.animated-letter:nth-child(1n) {
-		  animation-delay: 0s;
-		}
-
-		.animated-letter:nth-child(2n) {
-		  animation-delay: 0.1s;
-		}
-
-		.animated-letter:nth-child(3n) {
-		  animation-delay: 0.2s;
-		}
-
-		.animated-letter:nth-child(4n) {
-		  animation-delay: 0.3s;
-		}
-
-		.animated-letter:nth-child(5n) {
-		  animation-delay: 0.4s;
-		}
-
-		.emote {
-		  position: absolute;
-		  z-index: 0;
-		}
-
-		@keyframes hide {
-			0% {
-				left: 0;
-			}
-
-			100% {
-				left: 100%;
-			}
-		}
-
-		@keyframes show {
-			0% {
-				left: 100%;
-			}
-
-			100% {
-				left: 0;
-			}
-		}
-
-		@keyframes icon-bounce {
-		  0% {
-		    top: -5px;
-		  }
-		  50% {
-		    top: 5px;
-		  }
-		  100% {
-		    top: -5px;
-		  }
-		}
-
-		@keyframes text-bounce {
-		  0% {
-		    top: 0;
-		  }
-		  50% {
-		    top: 5px;
-		  }
-		  100% {
-		    top: 0;
-		  }
-		}
-
-		@keyframes appear {
-		  0% {
-		    left: 100%;
-		  }
-		  100% {
-		    left: 0;
-		  }
-		}
-
-		@keyframes disappear {
-		  0% {
-		    left: 0;
-		  }
-		  100% {
-		    left: 100%;
-		  }
-		}
-	</style>
 </head>
 <body>
 	<div id="wrapper">	
@@ -339,4 +192,150 @@
 
 		function rand(min, max) { return Math.floor(Math.random() * (max - min) + min); }
 	</script>
+	<style>
+		@import url('https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300&display=swap');
+
+		body {
+			font-family: 'Readex Pro', sans-serif;
+		  color: white;
+		  font-size: 26px;
+		}
+
+		#wrapper {
+		  position: absolute;
+		  z-index: 1;
+		  left: 800px;
+		  top: 30px;
+		  width: 500px;
+		  height: 105px;
+		  text-align: left;
+		  overflow: hidden;
+		}
+
+		#alert-box {
+		  background-color: rgba(20, 20, 20, 1);
+		  position: relative;
+		  left: 100%;
+		  border-radius: 10px;
+		  margin: auto;
+		  height: 105px;
+		  display: grid;
+		  grid-template-areas: "avatar text";
+		  grid-template-columns: .25fr 1fr;
+		  grid-template-rows: 1fr;
+		  justify-content: center;
+		  align-content: center;
+		  align-items: center;
+		}
+
+		#icon {
+			width: 80px;
+			height: auto;
+		  grid-area: avatar;
+		  margin: auto;
+		  position: relative;
+		  animation: icon-bounce .5s infinite;
+		}
+
+		#text {
+		  grid-area: text;
+		}
+
+		.animated-letter {
+		  animation-name: text-bounce;
+		  animation-duration: .5s;
+		  animation-iteration-count: infinite;
+		  display: inline-block;
+		  animation-fill-mode: both;
+		  color: #aa55aa;
+		  position: relative;
+		}
+
+		.animated-letter:nth-child(1n) {
+		  animation-delay: 0s;
+		}
+
+		.animated-letter:nth-child(2n) {
+		  animation-delay: 0.1s;
+		}
+
+		.animated-letter:nth-child(3n) {
+		  animation-delay: 0.2s;
+		}
+
+		.animated-letter:nth-child(4n) {
+		  animation-delay: 0.3s;
+		}
+
+		.animated-letter:nth-child(5n) {
+		  animation-delay: 0.4s;
+		}
+
+		.emote {
+		  position: absolute;
+		  z-index: 0;
+		}
+
+		@keyframes hide {
+			0% {
+				left: 0;
+			}
+
+			100% {
+				left: 100%;
+			}
+		}
+
+		@keyframes show {
+			0% {
+				left: 100%;
+			}
+
+			100% {
+				left: 0;
+			}
+		}
+
+		@keyframes icon-bounce {
+		  0% {
+		    top: -5px;
+		  }
+		  50% {
+		    top: 5px;
+		  }
+		  100% {
+		    top: -5px;
+		  }
+		}
+
+		@keyframes text-bounce {
+		  0% {
+		    top: 0;
+		  }
+		  50% {
+		    top: 5px;
+		  }
+		  100% {
+		    top: 0;
+		  }
+		}
+
+		@keyframes appear {
+		  0% {
+		    left: 100%;
+		  }
+		  100% {
+		    left: 0;
+		  }
+		}
+
+		@keyframes disappear {
+		  0% {
+		    left: 0;
+		  }
+		  100% {
+		    left: 100%;
+		  }
+		}
+	</style>
 </body>
