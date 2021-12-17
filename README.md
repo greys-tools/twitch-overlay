@@ -1,4 +1,4 @@
-# Twitch Alerts
+# Twitch Overlay
 Extremely simple self-hosted browser source for Twitch alerts and miscellaneous overlays
 
 # Currently handled
