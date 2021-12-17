@@ -6,9 +6,10 @@
 		@import url('https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300&display=swap');
 
 		body {
-			font-family: 'Readex Pro', sans-serif;
+		  font-family: 'Readex Pro', sans-serif;
 		  color: white;
 		  font-size: 26px;
+		  overflow: hidden;
 		}
 
 		#wrapper {
@@ -175,10 +176,11 @@
 		}
 
 		const emote_url = `https://static-cdn.jtvnw.net/emoticons/v2/:id/default/light/2.0`;
+		const wHeight = window.innerHeight;
+		const wWidth = window.innerWidth;
+		const emotes = new Set();
 
 		$( document ).ready(function() {
-			const wHeight = window.innerHeight;
-			const wWidth = window.innerWidth;
 			const socket = io(`%WS_URL%/notifs`);
 			const e_event = document.querySelector('#event-text');
 			const e_img = document.querySelector('#icon');
@@ -187,7 +189,6 @@
 				socket.send('yote');
 			})
 
-			const emotes = new Set();
 			socket.on("message", data => {
 				if(data.type) {
 					switch(data.type) {
