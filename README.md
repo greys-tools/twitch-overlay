@@ -17,7 +17,10 @@ The following alert types are handled:
 Multiple events in a row are queued up, so no need to worry about missing one if another happens immediately after! Also, they should be on the screen for about 5 seconds
 
 ## Emotes
-Emotes pop up in a random spot on the screen and shoot off to another spot while fading away. Currently only one emoji per user can be seen on the screen at a time; once that emoji has disappeared, another can be shown by the same user again. Emojis from different users shouldn't be hindered at all
+Emotes from emote-only messages pop up in a random spot on the screen and shoot off to another spot while fading away. Currently only one emoji per user can be seen on the screen at a time; once that emoji has disappeared, another can be shown by the same user again. Emojis from different users shouldn't be hindered at all
+
+## Chat
+Against the right edge, below the alert box, is a chat window that handles (global) badges, emotes, and, of course, messages. The box is styled similarly to Twitch Studio's built-in chat overlay. Emote-only messages don't appear here, as they're handled above
 
 **More TBA**, we're planning on changing up emotes to have a configurable per-user limit at the very least
 
