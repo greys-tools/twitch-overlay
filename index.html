@@ -4,6 +4,10 @@
 
 	<style>
 		@import url('https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300&display=swap');
+		:root {
+			--bg-color: rgba(20, 20, 20, 1);
+			--opacity: 1;
+		}
 
 		body {
 		  font-family: 'Readex Pro', sans-serif;
@@ -24,7 +28,7 @@
 		}
 
 		#alert-box {
-		  background-color: rgba(20, 20, 20, 1);
+		  background-color: rgba(var(--bg-color), var(--opacity));
 		  position: relative;
 		  left: 100%;
 		  border-bottom-left-radius: 10px;
@@ -41,8 +45,8 @@
 		}
 
 		#icon {
-			width: 80px;
-			height: auto;
+		  width: 80px;
+		  height: auto;
 		  grid-area: avatar;
 		  margin: auto;
 		  position: relative;
@@ -81,6 +85,26 @@
 
 		.animated-letter:nth-child(5n) {
 		  animation-delay: 0.4s;
+		}
+
+		#chat-box {
+			position: absolute;
+			height: calc(100vh - 150px);
+			width: 500px;
+			left: calc(100vw - 500px);
+			top: 150px;
+			display: flex;
+			flex-direction: column;
+			justify-content: flex-end;
+			align-items: center;
+		}
+
+		.message {
+			background-color: rgba(var(--bg-color), var(--opacity));
+			box-sizing: border-box;
+			margin: 0 2px 5px 2px;
+			width: 100%;
+			position: relative;
 		}
 
 		.emote {
@@ -131,24 +155,6 @@
 		    top: 0;
 		  }
 		}
-
-		@keyframes appear {
-		  0% {
-		    left: 100%;
-		  }
-		  100% {
-		    left: 0;
-		  }
-		}
-
-		@keyframes disappear {
-		  0% {
-		    left: 0;
-		  }
-		  100% {
-		    left: 100%;
-		  }
-		}
 	</style>
 	<script>
 		const SOUNDS = {
@@ -174,20 +180,24 @@
 			GOAL_PROGRESS: 'goal_progress.png',
 			GOAL_END: 'goal_end.png',
 		}
+		var BADGES;
+		fetch('https://badges.twitch.tv/v1/badges/global/display')
+		.then(d => d.json)
+		.then(d => BADGES = d)
+		.catch(console.error);
 
 		const emote_url = `https://static-cdn.jtvnw.net/emoticons/v2/:id/default/light/2.0`;
 		const wHeight = window.innerHeight;
 		const wWidth = window.innerWidth;
 		const emotes = new Set();
 
-		$( document ).ready(function() {
+		$(document).ready(function() {
 			const socket = io(`%WS_URL%/notifs`);
 			const e_event = document.querySelector('#event-text');
 			const e_img = document.querySelector('#icon');
 			const e_alertbox = document.querySelector('#alert-box');
-			socket.on('connect', () => {
-				socket.send('yote');
-			})
+			const e_chatbox = document.querySelector('#chat-box');
+			socket.on('connect', () => console.log('socket connect'))
 
 			socket.on("message", data => {
 				if(data.type) {
@@ -274,6 +284,9 @@
 							animateEmoji(emote, user);
 							return;
 							break;
+						case 'chat':
+							handleChat(data.event);
+							break;
 					}
 					
 					e_alertbox.style.animation = 'show .5s forwards';
@@ -320,6 +333,59 @@
 				em.remove();
 				emotes.delete(u);
 			})
+		}
+
+		function handleChat(event) {
+			var { message, user, state: { id, badges, emotes, color }};
+
+			var badgeML = Object.keys(badges).map(b => {
+				return `<img src="${BADGES[b].versions[badges[b]].image_url_1x}" />`;
+			}).join("\n");
+
+			var textML = message;
+			for(var [k, v] of Object.entries(emotes)) {
+				for(var a of v) {
+					var split = v.split('-')
+					var s = parseInt(split[0]);
+					var e = parseInt(split[1]);
+					textML = splice(
+						textMl, s, e,
+						`<img src="${emote_url.replace(':id', k).replace('2.0', '1.0')}" />`
+					)
+				}
+			}
+
+			var userML =
+				`<span style="color: ${color}"><strong>` +
+				user +
+				`</strong></span>`;
+
+			var msg = document.createElement(div);
+			msg.id = `msg-${id}`;
+			msg.classList.add('message');
+			msg.innerHTML = (
+				`<span>${badgeML}</span>` +
+				userML +
+				`<span>${textML}</span>`
+			);
+			msg.style.top = '100%';
+			e_chatbox.appendChild(msg);
+
+			$(`#msg-${id}`).animate({top: 0}, 500, function() {
+				setTimeout(() => {
+					$(`#msg-${id}`).animate({opacity: 0}, 500, function() {
+						msg.remove()
+					})
+				}, 4500)
+			})
+		}
+
+		function splice(str, start, end, add) {
+			return (
+				str.slice(0, start) +
+				(add || '') +
+				str.slice(start + end)
+			)
 		}
 
 		function rand(min, max) { return Math.floor(Math.random() * (max - min) + min); }

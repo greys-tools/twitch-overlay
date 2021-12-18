@@ -242,16 +242,28 @@ async function subscribe() {
 client.connect();
 client.on('message', (channel, state, message, self) => {
 	if(self) return;
-	if(!state['emote-only']) return;
 
-	appNsp.emit('message', {
-		id: 'emote',
-		type: 'emote',
-		event: {
-			emote: Object.keys(state.emotes)[0],
-			user: state.username
-		}
-	})
+	// console.log(message, state);
+	if(!state['emote-only'] && state['message-type'] == 'chat') {
+		appNsp.emit('message', {
+			id: state.id,
+			type: state['message-type'],
+			event: {
+				message,
+				user: state.username,
+				state
+			}
+		})
+	} else if(state['emote-only']) {
+		appNsp.emit('message', {
+			id: state.id,
+			type: 'emote',
+			event: {
+				emote: Object.keys(state.emotes)[0],
+				user: state.username
+			}
+		})
+	}
 });
 client.on('hosted', (channel, username, viewers, autohost) => {
 	queue.push({
