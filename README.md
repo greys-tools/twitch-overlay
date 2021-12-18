@@ -63,9 +63,9 @@ This app uses socket.io for communicating between the frontend and backend, whic
 1. Clone this repo to your host
 2. Copy the `example.env`, rename to `.env`, and supply the correct info
 3. Run `npm install` to install dependencies
-4. Run `node index` to get it up and running
-5. Replace the sounds and images in `/assets` (keep the names the same! or just make sure to change them in `index.html`)
-6. Configure anything else you need to make the site available on the web (eg. DNS, NginX, etc)
+4. Replace the sounds and images in `/assets` (keep the names the same! or just make sure to change them in `index.html`)
+5. Configure anything else you need to make the site available on the web (eg. DNS, NginX, etc)
+6. Run `node index` to get it up and running
 7. Add the site as a browser source in whatever streaming application you use, making sure it covers the full screen
 
 If you have an alt account, you can test that it's working by following your main and making sure that an alert pops up\*. If all's working, then you're all set! The app handles everything necessary for staying subscribed to events, so you can just leave it running for whenever you stream
