@@ -5,7 +5,7 @@
 	<style>
 		@import url('https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300&display=swap');
 		:root {
-			--bg-color: rgba(20, 20, 20, 1);
+			--bg-color: 20, 20, 20;
 			--opacity: 1;
 		}
 
@@ -90,21 +90,33 @@
 		#chat-box {
 			position: absolute;
 			height: calc(100vh - 150px);
-			width: 500px;
-			left: calc(100vw - 500px);
+			width: 300px;
+			left: calc(100vw - 300px);
 			top: 150px;
 			display: flex;
 			flex-direction: column;
 			justify-content: flex-end;
-			align-items: center;
+			align-items: flex-start;
+			overflow: hidden;
 		}
 
 		.message {
 			background-color: rgba(var(--bg-color), var(--opacity));
+			border-radius: 5px;
 			box-sizing: border-box;
 			margin: 0 2px 5px 2px;
-			width: 100%;
 			position: relative;
+			padding: 10px;
+			font-size: 16px;
+		}
+
+		.message .badge {
+			margin: 0 5px;
+			vertical-align: middle;
+		}
+
+		.message .emoji {
+			vertical-align: middle;
 		}
 
 		.emote {
@@ -182,8 +194,8 @@
 		}
 		var BADGES;
 		fetch('https://badges.twitch.tv/v1/badges/global/display')
-		.then(d => d.json)
-		.then(d => BADGES = d)
+		.then(d => d.json())
+		.then(d => BADGES = d.badge_sets)
 		.catch(console.error);
 
 		const emote_url = `https://static-cdn.jtvnw.net/emoticons/v2/:id/default/light/2.0`;
@@ -283,10 +295,9 @@
 							emotes.add(user);
 							animateEmoji(emote, user);
 							return;
-							break;
 						case 'chat':
 							handleChat(data.event);
-							break;
+							return;
 					}
 					
 					e_alertbox.style.animation = 'show .5s forwards';
@@ -295,6 +306,55 @@
 					}, 4500)
 				}
 			});
+
+			function handleChat(event) {
+				var { message, user, state: { id, badges, emotes, color }} = event;
+
+				var badgeML = Object.keys(badges).map(b => {
+					return `<img src="${BADGES[b].versions[badges[b]].image_url_1x}" class="badge" />`;
+				}).join("\n");
+
+				var textML = message;
+				console.log(emotes);
+				if(emotes) {
+					for(var [k, v] of Object.entries(emotes)) {
+						console.log(k, v)
+						for(var a of v) {
+							var split = a.split('-')
+							var s = parseInt(split[0]);
+							var e = parseInt(split[1]);
+							textML = splice(
+								textML, s, e,
+								`<img src="${emote_url.replace(':id', k).replace('2.0', '1.0')}" class="emoji" />`
+							)
+						}
+					}
+				}
+
+				var userML =
+					`<span style="color: ${color}"><strong>` +
+					user +
+					`</strong></span>`;
+
+				var msg = document.createElement('div');
+				msg.id = `msg-${id}`;
+				msg.classList.add('message');
+				msg.innerHTML = (
+					`<span>${badgeML}</span>` +
+					userML +
+					`: <span>${textML}</span>`
+				);
+				msg.style.top = '100%';
+				e_chatbox.appendChild(msg);
+
+				$(`#msg-${id}`).animate({top: 0}, 250, function() {
+					setTimeout(() => {
+						$(`#msg-${id}`).animate({opacity: 0}, 500, function() {
+							msg.remove()
+						})
+					}, 4500)
+				})
+			}
 		})
 		
 		function animateText(s) {
@@ -335,51 +395,6 @@
 			})
 		}
 
-		function handleChat(event) {
-			var { message, user, state: { id, badges, emotes, color }};
-
-			var badgeML = Object.keys(badges).map(b => {
-				return `<img src="${BADGES[b].versions[badges[b]].image_url_1x}" />`;
-			}).join("\n");
-
-			var textML = message;
-			for(var [k, v] of Object.entries(emotes)) {
-				for(var a of v) {
-					var split = v.split('-')
-					var s = parseInt(split[0]);
-					var e = parseInt(split[1]);
-					textML = splice(
-						textMl, s, e,
-						`<img src="${emote_url.replace(':id', k).replace('2.0', '1.0')}" />`
-					)
-				}
-			}
-
-			var userML =
-				`<span style="color: ${color}"><strong>` +
-				user +
-				`</strong></span>`;
-
-			var msg = document.createElement(div);
-			msg.id = `msg-${id}`;
-			msg.classList.add('message');
-			msg.innerHTML = (
-				`<span>${badgeML}</span>` +
-				userML +
-				`<span>${textML}</span>`
-			);
-			msg.style.top = '100%';
-			e_chatbox.appendChild(msg);
-
-			$(`#msg-${id}`).animate({top: 0}, 500, function() {
-				setTimeout(() => {
-					$(`#msg-${id}`).animate({opacity: 0}, 500, function() {
-						msg.remove()
-					})
-				}, 4500)
-			})
-		}
-
 		function splice(str, start, end, add) {
 			return (
 				str.slice(0, start) +
@@ -392,7 +407,8 @@
 	</script>
 </head>
 <body>
-	<div id="wrapper">	
+	<div id="chat-box"></div>
+	<div id="wrapper">
 		<div id="alert-box">
 			<img id="icon" src=''>
 			<div id="text">
