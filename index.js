@@ -17,6 +17,15 @@ io.on('connection', socket => {
 	socket.send("test");
 })
 
+appNsp.on('connection', socket => {
+	var user_limit = process.env.USER_EMOTE_LIMIT;
+	if(typeof user_limit == 'string') user_limit = parseInt(user_limit);
+	if(isNaN(user_limit)) user_limit = 5;
+	appNsp.emit('vars', {
+		user_limit
+	})
+})
+
 const tmi = require('tmi.js');
 const client = new tmi.Client({
 	identity: {

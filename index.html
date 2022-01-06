@@ -169,6 +169,23 @@
 		}
 	</style>
 	<script>
+		Map.prototype.find = function(func) {
+			for(var [k, v] of this) {
+				if(func(v, k, this)) return v;
+			}
+
+			return undefined;
+		}
+
+		Map.prototype.filter = function(func) {
+			var found = [];
+			for(var [k, v] of this) {
+				if(func(v, k, this)) found.push(v);
+			}
+
+			return found;
+		}
+
 		const SOUNDS = {
 			FOLLOW: new Audio('follow.wav'),
 			HOST: new Audio('host.wav'),
@@ -201,7 +218,10 @@
 		const emote_url = `https://static-cdn.jtvnw.net/emoticons/v2/:id/default/light/2.0`;
 		const wHeight = window.innerHeight;
 		const wWidth = window.innerWidth;
-		const emotes = new Set();
+		const emotes = new Map();
+		const vars = {
+			user_limit: 5
+		};
 
 		$(document).ready(function() {
 			const socket = io(`%WS_URL%/notifs`);
@@ -210,6 +230,11 @@
 			const e_alertbox = document.querySelector('#alert-box');
 			const e_chatbox = document.querySelector('#chat-box');
 			socket.on('connect', () => console.log('socket connect'))
+
+			socket.on('vars', data => {
+				for(var k in data) vars[k] = data[k];
+					console.log(vars)
+			})
 
 			socket.on("message", data => {
 				if(data.type) {
@@ -291,9 +316,12 @@
 							break;
 						case 'emote':
 							var {user, emote} = data.event;
-							if(emotes.has(user)) return;
-							emotes.add(user);
-							animateEmoji(emote, user);
+							var id = data.id;
+							if(emotes.get(id)) return;
+							var found = emotes.filter((v) => v.user == user)
+							if(found && found.length >= vars.user_limit) return;
+							emotes.set(id, {user, emote});
+							animateEmoji(emote, user, id);
 							return;
 						case 'chat':
 							handleChat(data.event);
@@ -365,9 +393,8 @@
 		    return `<strong>${arr.join('')}</strong>`;
 		}
 
-		function animateEmoji(e, u) {
+		function animateEmoji(e, u, id) {
 			var src = emote_url.replace(':id', e);
-			var id = rand(0, 10000);
 			var start = {
 				left: rand(0, wWidth),
 				top: rand(0, wHeight)
@@ -391,7 +418,7 @@
 
 			$(`#emote-${id}`).animate(end, 1000, function() {
 				em.remove();
-				emotes.delete(u);
+				emotes.delete(id);
 			})
 		}
 
