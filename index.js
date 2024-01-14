@@ -44,9 +44,10 @@ const {
 const SUBS = [
 	{
 		type: 'channel.follow',
-		version: 1,
+		version: 2,
 		condition: {
-			broadcaster_user_id: process.env.USER_ID
+			broadcaster_user_id: process.env.USER_ID,
+			moderator_user_id: process.env.USER_ID
 		}
 	},
 	{
@@ -109,6 +110,9 @@ const wsPort = process.env.WS_PORT || 3000;
 const nginx = parseInt(process.env.NGINX);
 const resolution = process.env.RESOLUTION;
 
+let BADGES;
+let TOKEN;
+
 let index = fs.readFileSync(__dirname + '/index.html', 'utf8');
 if(!nginx) index = index.replace('%WS_URL%', `${callbackURL}:${process.env.PORT}`);
 else index = index.replace('%WS_URL%', callbackURL);
@@ -132,7 +136,7 @@ function verify (req, res, next) {
 	next();
 }
 
-app.get('/', (req, res) => {
+app.get('/', (req, res) => {	
 	return res.send(index);
 })
 
@@ -216,10 +220,10 @@ const SUB_INST = axios.create({
 		'Content-Type': 'application/json'
 	}
 })
-async function subscribe() {
+async function setup() {
 	try {
-		var token = await getToken();
-		SUB_INST.defaults.headers['Authorization'] = `Bearer ${token}`;
+		TOKEN = await getToken();
+		SUB_INST.defaults.headers['Authorization'] = `Bearer ${TOKEN}`;
 
 		var transport = {
 			method: 'webhook',
@@ -243,6 +247,10 @@ async function subscribe() {
 				})
 			}
 		}
+
+		req = await SUB_INST(ENDPOINTS.GET_BADGES());
+		BADGES = req.data.data;
+		index = index.replace('%BADGES', JSON.stringify(BADGES));
 	} catch(e){
 		console.log(e.message, e.response?.data)
 	}
@@ -288,5 +296,5 @@ client.on('hosted', (channel, username, viewers, autohost) => {
 })
 
 setInterval(() => cleanProcessed(), 2 * 60 * 1000);
-subscribe();
+setup();
 app.use(express.static(__dirname + '/assets'));

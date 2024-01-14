@@ -209,11 +209,7 @@
 			GOAL_PROGRESS: 'goal_progress.png',
 			GOAL_END: 'goal_end.png',
 		}
-		var BADGES;
-		fetch('https://badges.twitch.tv/v1/badges/global/display')
-		.then(d => d.json())
-		.then(d => BADGES = d.badge_sets)
-		.catch(console.error);
+		var BADGES = %BADGES;
 
 		const emote_url = `https://static-cdn.jtvnw.net/emoticons/v2/:id/default/light/2.0`;
 		const wHeight = window.innerHeight;
@@ -300,7 +296,7 @@
 							break;
 						case 'channel.goal.progress':
 							e_event.innerHTML = 
-								animateText(data.event.type.slice(0, -1)) +
+								animateText(data.event.type) +
 								' goal progress!<br><strong>' +
 								animateText(data.event.current_amount.toString()) +
 								`</strong> out of ` +
@@ -310,7 +306,7 @@
 							break;
 						case 'channel.goal.end':
 							if(!data.event.is_achieved) return;
-							e_event.innerHTML = `${animateText(data.event.type.slice(0, -1))} goal <strong>completed!</strong>`; 
+							e_event.innerHTML = `${animateText(data.event.type)} goal <strong>completed!</strong>`; 
 							e_img.src = IMAGES.GOAL_END;
 							SOUNDS.GOAL_END.play();
 							break;
@@ -338,8 +334,8 @@
 			function handleChat(event) {
 				var { message, user, state: { id, badges, emotes, color }} = event;
 
-				var badgeML = Object.keys(badges).map(b => {
-					return `<img src="${BADGES[b].versions[badges[b]].image_url_1x}" class="badge" />`;
+				var badgeML = Object.entries(badges).map(([b, k]) => {
+					return `<img src="${BADGES.find(x => x.set_id == b).versions.find(x => x.id == k).image_url_1x}" class="badge" />`;
 				}).join("\n");
 
 				var textML = message;

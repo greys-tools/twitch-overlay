@@ -11,9 +11,10 @@ module.exports = {
 		REVOKE: 'revocation'
 	},
 	ENDPOINTS: {
-		BASE: () => `https://api.twitch.tv/helix/eventsub`,
-		GET_SUBSCRIPTIONS: () => `/subscriptions`,
-		CREATE_SUBSCRIPTION: () => `/subscriptions`,
-		DELETE_SUBSCRIPTION: (id) => `/subscriptions?id=${id}`
+		BASE: () => `https://api.twitch.tv/helix`,
+		GET_SUBSCRIPTIONS: () => `/eventsub/subscriptions`,
+		CREATE_SUBSCRIPTION: () => `/eventsub/subscriptions`,
+		DELETE_SUBSCRIPTION: (id) => `/eventsub/subscriptions?id=${id}`,
+		GET_BADGES: () => `chat/badges/global`
 	}
 }
