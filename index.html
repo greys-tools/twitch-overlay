@@ -334,9 +334,18 @@
 			function handleChat(event) {
 				var { message, user, state: { id, badges, emotes, color }} = event;
 
+<<<<<<< HEAD
 				var badgeML = Object.entries(badges).map(([b, k]) => {
 					return `<img src="${BADGES.find(x => x.set_id == b).versions.find(x => x.id == k).image_url_1x}" class="badge" />`;
 				}).join("\n");
+=======
+				var badgeML;
+				if(badges) {
+					badgeML = Object.keys(badges).map(b => {
+						return `<img src="${BADGES[b].versions[badges[b]].image_url_1x}" class="badge" />`;
+					}).join("\n");
+				} else badgeML = "";
+>>>>>>> 3697f28291e92c5eadc28a08e98eddeb12711b27
 
 				var textML = message;
 				console.log(emotes);
