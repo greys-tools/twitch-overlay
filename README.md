@@ -24,13 +24,26 @@ Against the right edge, below the alert box, is a chat window that handles (glob
 ## Chat-only and alerts-only options
 Just want to have a chatbox, or just want alerts? You can do so! Just set your OBS browser source to your base url with `chat-only` or `alerts-only` on the end, like so: `https://example.com/chat-only`
 
-**More TBA**, we're planning on changing up emotes to have a configurable per-user limit at the very least
+**More TBA!**
+
+# Customizing
+## Styles
+If you want to edit the styles of the overlay (ie. the page's CSS), you can find all of it near the top of the `index.html` file. You can move this to a separate file if desired, but keeping it in the `index.html` makes it so that the styles update as soon as they're edited
+
+## Event text
+Event text can be adjusted by changing the text returned in each `/subscriptions/[event].js` file. These files send HTML to the browser, so make sure that you're returning proper code there
+
+## Adding events
+Similar to editing event text, you can also add new events by adding new files to the `/subscriptions` folder! The file name doesn't matter, but it's recommended that you name it something that's easy to understand later. Keep in mind that you'll need to have some knowledge of Twitch's [EventSub API](https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types/) to be able to do this
+
+## Changing sounds and images
+There are two ways to change the images/sounds used:
+1. Add a new file to the `/assets` folder, then go to the `index.html` and change the file name inside the `SOUNDS` or `IMAGES` object
+2. Overwrite the existing sound/image with your new one, making sure the names match
+
+Either way is perfectly acceptable. The first way will keep the original files so that you can restore them later, the second way will completely get rid of them
 
 # Self Hosting
-## REPL.IT
-If you'd like to use Repl.it for testing, you can fork [this repl](https://replit.com/@GreyHimmel/twitch-overlay?v=1), create and populate the required env variables, and then you're good to go!  
-**Keep in mind that Repl.it no longer allows hosting without doing premium deployments**, but this is a good way to test your setup and make sure everything's working to your liking before hosting.
-
 ## VPS
 ### Requirements
 - NodeJS 12.x or higher
@@ -51,6 +64,7 @@ BOT_USERNAME= # chat bot username, optional
 OAUTH_TOKEN= # your chat bot's token, optional
 
 PORT= # the port for your server
+DEV= # set to true or 1 when doing dev work. THIS TOOL WILL NOT WORK PROPERLY IF DEV ISN'T EMPTY
 ```
 
 - Client ID and secret are from your dev app
@@ -69,7 +83,7 @@ This app uses the server-sent events API for communicating between the frontend 
 
 If you have an alt account, you can test that it's working by following your main and making sure that an alert pops up\*. If all's working, then you're all set! The app handles everything necessary for staying subscribed to events, so you can just leave it running for whenever you stream
 
-\* = **NOTE:** Sometimes sounds won't play at first if you're looking at it in an actual browser- you have to "interact" with the page first (try clicking in the blank space). This isn't a problem for browser sources, thankfully
+\* = **NOTE:** Sometimes sounds won't play at first if you're looking at it in an actual browser. You have to "interact" with the page first (try clicking in the blank space). This isn't a problem for browser sources, thankfully
 
 # Support
 If you need support, feel free to open an issue! However, please note that we *can not* provide support related to hosting- we can only help if something directly related to the program breaks
