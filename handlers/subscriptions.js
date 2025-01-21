@@ -116,7 +116,7 @@ module.exports = async function setup(app, evtClients, TOKEN) {
 				await Client.delete(ENDPOINTS.DELETE_SUBSCRIPTION(e.id));
 			}
 
-			for (var sub of Array.from(SUBS, (k,v) => v)) {
+			for (var sub of Array.from(SUBS, ([k,v]) => v)) {
 				if (
 					!existing.data.find(
 						(s) =>
