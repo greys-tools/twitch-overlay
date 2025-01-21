@@ -61,7 +61,7 @@
 			grid-area: text;
 		}
 
-		.animated-letter {
+		.animated span {
 			animation-name: text-bounce;
 			animation-duration: 0.5s;
 			animation-iteration-count: infinite;
@@ -71,23 +71,23 @@
 			position: relative;
 		}
 
-		.animated-letter:nth-child(1n) {
+		.animated span:nth-child(1n) {
 			animation-delay: 0s;
 		}
 
-		.animated-letter:nth-child(2n) {
+		.animated span:nth-child(2n) {
 			animation-delay: 0.1s;
 		}
 
-		.animated-letter:nth-child(3n) {
+		.animated span:nth-child(3n) {
 			animation-delay: 0.2s;
 		}
 
-		.animated-letter:nth-child(4n) {
+		.animated span:nth-child(4n) {
 			animation-delay: 0.3s;
 		}
 
-		.animated-letter:nth-child(5n) {
+		.animated span:nth-child(5n) {
 			animation-delay: 0.4s;
 		}
 
@@ -283,98 +283,14 @@
 		}
 
 		function handleSpecial(event) {
-			var { type, data } = event;
-
-			switch (type) {
-				case "channel.follow":
-					e_event.innerHTML = `${animateText(data.user_name)} followed!`;
-					e_img.src = IMAGES.FOLLOW;
-					SOUNDS.FOLLOW.play();
-					break;
-				case "channel.raid":
-					e_event.innerHTML =
-						animateText(data.from_broadcaster_user_name) +
-						" raided with<br><strong>" +
-						animateText(data.viewers.toString()) +
-						"</strong> viewers!";
-					e_img.src = IMAGES.RAID;
-					SOUNDS.RAID.play();
-					break;
-				case "host":
-					e_event.innerHTML =
-						animateText(data.username) +
-						" hosted with<br><strong>" +
-						animateText(data.viewers.toString()) +
-						"</strong> viewers!";
-					e_img.src = IMAGES.HOST;
-					SOUNDS.HOST.play();
-					break;
-				case "channel.subscribe":
-					e_event.innerHTML =
-						animateText(data.user_name) +
-						" subbed at <br>tier <strong>" +
-						animateText((data.tier / 1000).toString()) +
-						"</strong>!";
-					e_img.src = IMAGES.SUB;
-					SOUNDS.SUB.play();
-					break;
-				case "channel.subscription.gift":
-					e_event.innerHTML =
-						animateText(data.user_name || "Anonymous") +
-						" gifted<br><strong>" +
-						animateText(data.total.toString()) +
-						"</strong> subs!";
-					e_img.src = IMAGES.SUB_GIFT;
-					SOUNDS.SUB_GIFT.play();
-					break;
-				case "channel.subscription.message":
-					e_event.innerHTML =
-						animateText(data.user_name) +
-						" resubbed for<br><strong>" +
-						animateText(data.duration_months.toString()) +
-						"</strong> months!";
-					e_img.src = IMAGES.RESUB;
-					SOUNDS.RESUB.play();
-					break;
-				case "channel.cheer":
-					e_event.innerHTML =
-						animateText(data.user_name || "Anonymous") +
-						" cheered for<br><strong>" +
-						animateText(data.bits.toString()) +
-						"</strong> bits!";
-					e_img.src = IMAGES.CHEER;
-					SOUNDS.CHEER.play();
-					break;
-				case "channel.goal.progress":
-					e_event.innerHTML =
-						animateText(data.type) +
-						" goal progress!<br><strong>" +
-						animateText(data.current_amount.toString()) +
-						`</strong> out of ` +
-						`<strong>${data.target_amount.toString()}!</strong>`;
-					e_img.src = IMAGES.GOAL_PROGRESS;
-					SOUNDS.GOAL_PROGRESS.play();
-					break;
-				case "channel.goal.end":
-					if (!data.is_achieved) return;
-					e_event.innerHTML = `${animateText(type)} goal <strong>completed!</strong>`;
-					e_img.src = IMAGES.GOAL_END;
-					SOUNDS.GOAL_END.play();
-					break;
-			}
+			e_event.innerHTML = event.text;
+			e_img.src = IMAGES[event.img];
+			SOUNDS[event.sound].play();
 
 			e_alertbox.style.animation = "show .5s forwards";
 			setTimeout(() => {
 				e_alertbox.style.animation = "hide .5s forwards";
 			}, 2500);
-		}
-
-		function animateText(s) {
-			let arr = s.split("");
-			arr = arr.map((l) => {
-				return `<span class="animated-letter">${l}</span>`;
-			});
-			return `<strong>${arr.join("")}</strong>`;
 		}
 
 		function rand(min, max) {

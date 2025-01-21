@@ -21,7 +21,9 @@ function formatChat(event) {
 	if (badges) {
 		var badgeML = Object.entries(badges)
 			.map(([b, k]) => {
-				return `<img src="${BADGES.find((x) => x.set_id == b).versions.find((x) => x.id == k).image_url_1x}" class="badge" />`;
+				let bg = BADGES.find((x) => x.set_id == b)?.versions.find((x) => x.id == k)?.image_url_1x;
+				if(bg) return `<img src="${bg}" class="badge" />`;
+				else return '';
 			})
 			.join("\n");
 	} else badgeML = "";
@@ -68,28 +70,27 @@ var BADGES;
 module.exports = async function setup(app, evtClients, TOKEN) {
 	client.connect();
 
-	let req = await axios.get(`${ENDPOINTS.BASE()}/${ENDPOINTS.GET_BADGES()}`, {
+	let globalBadges = await axios.get(`${ENDPOINTS.BASE()}/${ENDPOINTS.GET_BADGES()}`, {
 		headers: {
 			Authorization: `Bearer ${TOKEN}`,
 			"Client-Id": process.env.CLIENT_ID,
 		},
 	});
-	BADGES = req.data.data;
+	globalBadges = globalBadges.data.data;
 
-	// client.on('message', (channel, tags, message, self) => {
-	// 	console.log(message, self)
-	// 	if(self) return;
+	let channelBadges = await axios.get(`${ENDPOINTS.BASE()}/${ENDPOINTS.GET_CHANNEL_BADGES()}`, {
+		headers: {
+			Authorization: `Bearer ${TOKEN}`,
+			"Client-Id": process.env.CLIENT_ID,
+		},
+	});
+	channelBadges = channelBadges.data.data;
 
-	// 	for(var c of Object.values(evtClients)) {
-	// 		c.write(`event: message\n`);
-	// 		c.write(`data: ${JSON.stringify({ message })}\n\n`);
-	// 	}
-	// })
+	BADGES = [...channelBadges, ...globalBadges];
 
 	client.on("message", (channel, state, message, self) => {
 		if (self) return;
 
-		// console.log(message, state);
 		var evt, data;
 		if (!state["emote-only"] && state["message-type"] == "chat") {
 			evt = "message";

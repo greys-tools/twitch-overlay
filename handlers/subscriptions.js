@@ -1,12 +1,15 @@
 const axios = require("axios");
 const crypto = require("crypto");
-const { ENDPOINTS, SUBS, HEADERS, EVENTS } = require("../constants");
-const { sleep } = require("../utils");
+const fs = require("fs");
+const { ENDPOINTS, HEADERS, EVENTS } = require("../constants");
+const { sleep } = require("../utils");;
 
 const clientID = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
 const callbackURL = process.env.CALLBACK_URL;
 const appSecret = process.env.APP_SECRET;
+
+const SUBS = new Map();
 
 var running;
 
@@ -19,6 +22,7 @@ const Client = axios.create({
 });
 
 function verify(req, res, next) {
+	if(process.env.DEV) return next();
 	if (!verifyHash(req.headers, req.body)) return res.status(403).send();
 	next();
 }
@@ -34,13 +38,34 @@ function verifyHash(headers, body) {
 	return crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(sig));
 }
 
+const recursiveRead = (dir) => {
+	var results = [];
+	var files = fs.readdirSync(dir, {withFileTypes: true});
+	for(file of files) {
+		if(file.isDirectory()) {
+			results = results.concat(recursiveRead(dir+"/"+file.name));
+		} else {
+			results.push(dir+"/"+file.name);
+		}
+	}
+
+	return results;
+}
+
 async function handleQueue(clients) {
 	running = true;
 
 	if (events.length) {
+		let subtype = await SUBS.get(events[0].type);
+		let result = await subtype.execute(events[0].data);
+
 		for (var c of Object.values(clients)) {
 			c.write(`event: special\n`);
-			c.write(`data: ${JSON.stringify(events[0])}\n\n`);
+			c.write(`data: ${JSON.stringify({
+				text: result,
+				sound: subtype.sound,
+				img: subtype.img
+			})}\n\n`);
 		}
 		events.shift();
 		await sleep(3000);
@@ -64,37 +89,47 @@ const events = [];
 const processed = new Map();
 
 module.exports = async function setup(app, evtClients, TOKEN) {
+	const files = recursiveRead(__dirname + '/../subscriptions');
+	for(var f of files) {
+		var sub = require(f);
+		SUBS.set(sub.data.type, sub);
+	}
+
+	console.log(SUBS);
+
 	try {
-		Client.defaults.headers["Authorization"] = `Bearer ${TOKEN}`;
+		if(!process.env.DEV) {
+			Client.defaults.headers["Authorization"] = `Bearer ${TOKEN}`;
 
-		var transport = {
-			method: "webhook",
-			callback: callbackURL,
-			secret: appSecret,
-		};
+			var transport = {
+				method: "webhook",
+				callback: callbackURL,
+				secret: appSecret,
+			};
 
-		var req = await Client.get(ENDPOINTS.GET_SUBSCRIPTIONS());
-		var existing = req.data;
+			var req = await Client.get(ENDPOINTS.GET_SUBSCRIPTIONS());
+			var existing = req.data;
 
-		for (var e of existing.data) {
-			if (e.status == "enabled" && e.transport.callback == callbackURL)
-				continue;
-			await Client.delete(ENDPOINTS.DELETE_SUBSCRIPTION(e.id));
-		}
+			for (var e of existing.data) {
+				if (e.status == "enabled" && e.transport.callback == callbackURL)
+					continue;
+				await Client.delete(ENDPOINTS.DELETE_SUBSCRIPTION(e.id));
+			}
 
-		for (var sub of SUBS) {
-			if (
-				!existing.data.find(
-					(s) =>
-						s.type == sub.type &&
-						s.status == "enabled" &&
-						s.transport.callback == callbackURL,
-				)
-			) {
-				await Client.post(ENDPOINTS.CREATE_SUBSCRIPTION(), {
-					...sub,
-					transport,
-				});
+			for (var sub of Array.from(SUBS, (k,v) => v)) {
+				if (
+					!existing.data.find(
+						(s) =>
+							s.type == sub.data.type &&
+							s.status == "enabled" &&
+							s.transport.callback == callbackURL,
+					)
+				) {
+					await Client.post(ENDPOINTS.CREATE_SUBSCRIPTION(), {
+						...sub.data,
+						transport,
+					});
+				}
 			}
 		}
 

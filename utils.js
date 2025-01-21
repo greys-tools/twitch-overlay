@@ -10,5 +10,13 @@ module.exports = {
 			(add || '') +
 			str.slice(start + end)
 		)
+	},
+
+	splitToSpans(str) {
+		return (
+			str.split('')
+			.map(s => `<span>${s}</span>`)
+			.join('')
+		);
 	}
 }
