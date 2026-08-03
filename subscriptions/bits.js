@@ -1,8 +1,8 @@
-const { splitToSpans: split } = require('../utils');
+import { splitToSpans as split } from '../utils.js';
 
-module.exports = {
+export default {
 	data: {
-		type: 'channel.cheer',
+		type: 'channel.bits.use',
 		version: 1,
 		condition: {
 			broadcaster_user_id: process.env.USER_ID
@@ -15,7 +15,7 @@ module.exports = {
 			`<span class="animated">` +
 			split(ctx.user_name) +
 			`</span>` +
-			` cheered for <br>` +
+			` used <br>` +
 			`<strong><span class="animated">` +
 			split((ctx.bits).toString()) +
 			`</span> bits</strong>!`

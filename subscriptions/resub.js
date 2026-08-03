@@ -1,6 +1,6 @@
-const { splitToSpans: split } = require('../utils');
+import { splitToSpans as split } from '../utils.js';
 
-module.exports = {
+export default {
 	data: {
 		type: 'channel.subscription.message',
 		version: 1,

@@ -12,11 +12,14 @@ module.exports = {
 	},
 	ENDPOINTS: {
 		BASE: () => `https://api.twitch.tv/helix`,
+		// BASE: () => `http://127.0.0.1:8080`,
 		GET_SUBSCRIPTIONS: () => `/eventsub/subscriptions`,
 		CREATE_SUBSCRIPTION: () => `/eventsub/subscriptions`,
 		DELETE_SUBSCRIPTION: (id) => `/eventsub/subscriptions?id=${id}`,
-		GET_BADGES: () => `chat/badges/global`,
-		GET_CHANNEL_BADGES: () => `chat/badges?broadcaster_id=${process.env.USER_ID}`
+		GET_BADGES: () => `/chat/badges/global`,
+		GET_CHANNEL_BADGES: () => `/chat/badges?broadcaster_id=${process.env.USER_ID}`
 	},
-	EMOTES: `https://static-cdn.jtvnw.net/emoticons/v2/:id/default/light/2.0`
+	EMOTES: `https://static-cdn.jtvnw.net/emoticons/v2/:id/default/light/2.0`,
+	SOCKET: `wss://eventsub.wss.twitch.tv/ws`
+	// SOCKET: `ws://127.0.0.1:8080/ws`
 }

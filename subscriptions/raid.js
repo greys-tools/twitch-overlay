@@ -1,9 +1,9 @@
-const { splitToSpans: split } = require('../utils');
+import { splitToSpans as split } from '../utils.js';
 
-module.exports = {
+export default {
 	data: {
 		type: 'channel.raid',
-		version: 2,
+		version: 1,
 		condition: {
 			to_broadcaster_user_id: process.env.USER_ID
 		}
