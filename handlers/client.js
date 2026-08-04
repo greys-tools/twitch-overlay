@@ -1,6 +1,8 @@
 import { EventEmitter } from 'node:events';
+import util from 'node:util';
 import axios from 'axios';
-import { SOCKET, ENDPOINTS } from '../constants.js';
+import { nanoid } from 'nanoid';
+import { SOCKET, ENDPOINTS, EMOTES } from '../constants.js';
 import Subscriptions from '../subscriptions';
 import db from '../db.sqlite' with { type: 'sqlite'};
 
@@ -31,44 +33,56 @@ export default class Client extends EventEmitter {
 
 		this.on('connected', ({ session_id }) => this.setSubs(session_id));
 		this.on('event', (data) => this.handleEvent(data));
+		this.on('chat', (data) => this.handleChat(data));
 		this.interval = setInterval(() => this.handleQueue(), 3_000);
 	}
 
 	async init() {
 		this.appToken = await this.getAppToken();
+		console.log(this.appToken);
 		this.userToken = await this.getUserToken();
 
 		this.ws = new WebSocket(SOCKET);
 		this.ws.addEventListener('message', async (msg) => {
 			let { metadata, payload: data } = JSON.parse(msg.data);
-			console.log(metadata, data);
+			// console.log(metadata, data);
 			if(data?.session?.id) {
 				this.connected = true;
 				this.emit('connected', { session_id: data.session.id })
 			} else {
 				if(metadata?.message_type == "notification") {
 					if(metadata.subscription_type == 'channel.chat.message') {
-						this.emit('chat', { id: metadata.message_id, data });
-					} else this.queue.push({ id: metadata.message_id, type: metadata.subscription_type, data });
+						this.emit('chat', { id: nanoid(10), data });
+					} else this.queue.push({ id: nanoid(10), type: metadata.subscription_type, data });
 				}
 			}
 		})
 
-		// let globalBadges = await this.reqClient.get(ENDPOINTS.GET_BADGES(), {
-		// 	headers: {
-		// 		Authorization: `Bearer ${this.appToken}`,
-		// 	},
-		// });
-		// globalBadges = globalBadges.data.data;
+		let badges;
+		let globalBadges = await this.reqClient.get(ENDPOINTS.GET_BADGES(), {
+			headers: {
+				Authorization: `Bearer ${this.appToken}`,
+			},
+		});
+		globalBadges = globalBadges.data.data;
 
-		// let channelBadges = await this.reqClient.get(ENDPOINTS.GET_CHANNEL_BADGES(), {
-		// 	headers: {
-		// 		Authorization: `Bearer ${this.appToken}`,
-		// 	},
-		// });
-		// channelBadges = channelBadges.data.data;
+		let channelBadges = await this.reqClient.get(ENDPOINTS.GET_CHANNEL_BADGES(), {
+			headers: {
+				Authorization: `Bearer ${this.appToken}`,
+			},
+		});
+		channelBadges = channelBadges.data.data;
+		badges = [...channelBadges, ...globalBadges];
 
-		// this.badges = [...channelBadges, ...globalBadges];
+		this.badges = new Map();
+		for(let b of badges) {
+			if(b.set_id == 'subscriber' && this.badges.get('subscriber')) continue;
+			let mp = new Map();
+			for(let s of b.versions) {
+				mp.set(s.id, s);
+			}
+			this.badges.set(b.set_id, mp);
+		}
 	}
 
 	async getAppToken() {
@@ -170,18 +184,67 @@ export default class Client extends EventEmitter {
 		res.write(`data: Connection established.\n\n`);
 	}
 
+	sendData(evt, data) {
+		for (var c of Object.values(this.evtClients)) {
+			c.write(`event: ${evt}\n`);
+			c.write(`data: ${JSON.stringify(data)}\n\n`);
+		}
+	}
+
 	async handleEvent({ id, type, data }) {
 		let subtype = await SUBS.get(type);
 		if(!subtype) return;
 		let result = await subtype.execute(data.event);
 
-		for (var c of Object.values(this.evtClients)) {
-			c.write(`event: special\n`);
-			c.write(`data: ${JSON.stringify({
-				text: result,
-				sound: subtype.sound,
-				img: subtype.img
-			})}\n\n`);
+		this.sendData('special', {
+			text: result,
+			sound: subtype.sound,
+			img: subtype.img
+		})
+	}
+
+	async handleChat({ id, data: { event } }) {
+		let { message: { fragments: frags }, badges, color, chatter_user_name: username } = event;
+		// console.log(badges, this.badges.get('subscriber'));
+		// return;
+
+		let type, msg;
+		if(frags?.length == 1 && frags[0].type == 'emote') {
+			type = 'emote';
+			msg = {
+				id,
+				src: EMOTES.replace(':id', frags[0].emote.id)
+			}
+		} else {
+			let tml = '';
+			let bml = '';
+			let uml = '';
+			for(var f of frags) {
+				if(f.type == 'text') tml += f.text;
+				else tml += `<img src="${EMOTES.replace(':id', f.emote.id)}" class="emoji"/>`;
+			}
+
+			if(badges?.length) {
+				for(let b of badges) {
+					let set = this.badges.get(b.set_id);
+					if(!set) continue;
+					let bdg = set.get(b.id)
+					if(!bdg) continue;
+					bml += `<img src="${bdg.image_url_1x}" class="badge" />\n`;
+				}
+			}
+
+			uml = `<span style="color: ${color}"><strong>` + username + `</strong></span>`;
+
+			type = 'message';
+			msg = {
+				id,
+				textML: tml,
+				badgeML: bml,
+				userML: uml
+			}
 		}
+
+		this.sendData(type, msg);
 	}
 }
