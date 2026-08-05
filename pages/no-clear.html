@@ -92,13 +92,7 @@
 			msg.style.top = "100%";
 			e_chatbox.appendChild(msg);
 
-			$(`#msg-${id}`).animate({ top: 0 }, 250, function () {
-				setTimeout(() => {
-					$(`#msg-${id}`).animate({ opacity: 0 }, 500, function () {
-						msg.remove();
-					});
-				}, 4500);
-			});
+			$(`#msg-${id}`).animate({ top: 0 }, 250);
 		}
 	</script>
 </head>

@@ -1,7 +1,7 @@
 import { EventEmitter } from 'node:events';
-import util from 'node:util';
 import axios from 'axios';
 import { nanoid } from 'nanoid';
+import { getSystem, getProxiedMessage } from 'pluralmind';
 import { SOCKET, ENDPOINTS, EMOTES } from '../constants.js';
 import Subscriptions from '../subscriptions';
 import db from '../db.sqlite' with { type: 'sqlite'};
@@ -26,6 +26,9 @@ export default class Client extends EventEmitter {
 	userToken;
 	badges;
 
+	pronouns = new Map();
+	prCache = new Map();
+
 	evtClients = {};
 
 	constructor() {
@@ -45,7 +48,6 @@ export default class Client extends EventEmitter {
 		this.ws = new WebSocket(SOCKET);
 		this.ws.addEventListener('message', async (msg) => {
 			let { metadata, payload: data } = JSON.parse(msg.data);
-			// console.log(metadata, data);
 			if(data?.session?.id) {
 				this.connected = true;
 				this.emit('connected', { session_id: data.session.id })
@@ -82,6 +84,12 @@ export default class Client extends EventEmitter {
 				mp.set(s.id, s);
 			}
 			this.badges.set(b.set_id, mp);
+		}
+
+		let prns = await axios.get(`https://api.pronouns.alejo.io/v1/pronouns`);
+		prns = prns.data;
+		for(var p in prns) {
+			this.pronouns.set(p, prns[p]);
 		}
 	}
 
@@ -133,10 +141,10 @@ export default class Client extends EventEmitter {
 		console.log(req?.data);
 		if(!req?.data?.access_token) return null;
 
-		await (db.query('update users set access=$access, refresh=$refresh', {
+		await (db.query('update users set access=$access, refresh=$refresh')).run({
 			$access: req.data.access_token,
 			$refresh: req.data.refresh_token
-		})).run();
+		});
 
 		return req.data.access_token;
 	}
@@ -208,17 +216,52 @@ export default class Client extends EventEmitter {
 		// console.log(badges, this.badges.get('subscriber'));
 		// return;
 
-		let type, msg;
+		let type, msg, prns;
+		let preq;
+		try {
+			preq = await axios.get(`https://api.pronouns.alejo.io/v1/users/${username}`);
+			preq = preq.data;
+
+			let tmp = '';
+			let ptmp;
+			if(preq?.pronoun_id) {
+				ptmp = this.pronouns.get(preq.pronoun_id);
+				tmp += `${ptmp.subject}/`;
+			}
+
+			if(preq?.alt_pronoun_id) {
+				let ptmp2 = this.pronouns.get(preq.alt_pronoun_id);
+				tmp += ptmp2.subject;
+			} else tmp += ptmp.object;
+
+			prns = tmp;
+		} catch(e) { }
+
+		let sys = await getSystem(username);
+		if(sys) {
+			let prox = getProxiedMessage(sys, frags);
+			if(prox) {
+				frags = prox.cleanFragments;
+				color = (prox.member.color ?? prox.system.color ?? color);
+				username = `${prox.member.name} (${username})`;
+				prns = prox.member.pronouns;
+			}
+		}
+
+		frags = frags.filter(x => x.text?.length);
 		if(frags?.length == 1 && frags[0].type == 'emote') {
+			// emote-only chats appear as emotes flying across the screen
 			type = 'emote';
 			msg = {
 				id,
 				src: EMOTES.replace(':id', frags[0].emote.id)
 			}
 		} else {
+			// actual chats appear as... actual chats lol
 			let tml = '';
 			let bml = '';
 			let uml = '';
+
 			for(var f of frags) {
 				if(f.type == 'text') tml += f.text;
 				else tml += `<img src="${EMOTES.replace(':id', f.emote.id)}" class="emoji"/>`;
@@ -230,11 +273,13 @@ export default class Client extends EventEmitter {
 					if(!set) continue;
 					let bdg = set.get(b.id)
 					if(!bdg) continue;
-					bml += `<img src="${bdg.image_url_1x}" class="badge" />\n`;
+					bml += `<img src="${bdg.image_url_1x}" class="badge" />`;
 				}
 			}
 
-			uml = `<span style="color: ${color}"><strong>` + username + `</strong></span>`;
+			if(prns?.length) {
+				uml = `<span class="pronouns">${prns}</span><span style="color: ${color}"><strong>${username}</strong></span>`;
+			} else uml = `<span style="color: ${color}"><strong>${username}</strong></span>`;
 
 			type = 'message';
 			msg = {

@@ -10,16 +10,25 @@ const app = express();
 app.use(express.json());
 app.use(express.static(__dirname + "/assets"));
 
+// combined chat and alerts in one overlay
 const index = fs.readFileSync("./pages/index.html");
 app.get("/", async (req, res) => {
 	return res.status(200).send(index.toString("utf-8"));
 });
 
+// just the chatbox, no alerts (easier to move around in scenes)
 const chat = fs.readFileSync("./pages/chat-only.html");
 app.get("/chat-only", async (req, res) => {
 	return res.status(200).send(chat.toString("utf-8"));
 });
 
+// non-clearing chat (eg. for just chatting scenes)
+const noClear = fs.readFileSync("./pages/no-clear.html");
+app.get("/no-clear", async (req, res) => {
+	return res.status(200).send(chat.toString("utf-8"));
+});
+
+// just alerts, no chat
 const alerts = fs.readFileSync("./pages/alerts-only.html");
 app.get("/alerts-only", async (req, res) => {
 	return res.status(200).send(alerts.toString("utf-8"));
@@ -31,7 +40,6 @@ app.get("/events", async (req, res) => {
 
 	client.addClient(clientId, res);
 });
-
 
 const PORT = process.env.PORT ?? 8080;
 app.listen(PORT);
