@@ -46,15 +46,17 @@ Either way is perfectly acceptable. The first way will keep the original files s
 # Self Hosting
 ## VPS
 ### Requirements
-- NodeJS 12.x or higher
+- NodeJS 24.x or higher
 - An account for chat access (your broadcaster account works, though you can also make an alt)
 - A Twitch [dev app](https://dev.twitch.com)
+- Twitch [tokens](https://twitchtokengenerator.com) **using your dev app's client ID and secret**
+- A bit of knowledge about SQLite
 
 ### Environment
 The current `example.env` looks like this:
 ```bash
-CLIENT_ID= # your twitch client's ID
-CLIENT_SECRET= # your twitch client's secret
+CLIENT_ID= # your twitch dev app's ID
+CLIENT_SECRET= # your twitch dev app's secret
 APP_SECRET= # random string used to verify events
 CALLBACK_URL= # your outside url
 
@@ -64,11 +66,7 @@ BOT_USERNAME= # chat bot username, optional
 OAUTH_TOKEN= # your chat bot's token, optional
 
 PORT= # the port for your server
-DEV= # set to true or 1 when doing dev work. THIS TOOL WILL NOT WORK PROPERLY IF DEV ISN'T EMPTY
 ```
-
-- Client ID and secret are from your dev app
-- App secret should be *randomly genderated* to be secure  
 
 This app uses the server-sent events API for communicating between the frontend and backend. Previously we used websockets via socket.io, which NginX had issues with. This version should do better now thankfully!
 
@@ -76,10 +74,11 @@ This app uses the server-sent events API for communicating between the frontend 
 1. Clone this repo to your host
 2. Copy the `example.env`, rename to `.env`, and supply the correct info
 3. Run `npm install` to install dependencies
-4. If you'd like, replace the sounds and images in `/assets` (keep the names the same! or just make sure to change the names in `index.html`)
-5. Configure anything else you need to make the site available on the web (eg. DNS, NginX, etc)
-6. Run `node index` to get it up and running
-7. Add the site as a browser source in whatever streaming application you use, making sure it covers the full screen
+5. Grab an access token and refresh token from https://twitchtokengenerator.com, insert them into the `db.sqlite.example` where relevant (see: users table), and rename it to just `db.sqlite`
+6. If you'd like, replace the sounds and images in `/assets` (keep the names the same! or just make sure to change the names in `index.html`)
+7. Configure anything else you need to make the site available on the web (eg. DNS, NginX, etc)
+8. Run `node index` to get it up and running
+9. Add the site as a browser source in whatever streaming application you use, making sure it covers the full screen
 
 If you have an alt account, you can test that it's working by following your main and making sure that an alert pops up\*. If all's working, then you're all set! The app handles everything necessary for staying subscribed to events, so you can just leave it running for whenever you stream
 
@@ -88,4 +87,4 @@ If you have an alt account, you can test that it's working by following your mai
 # Support
 If you need support, feel free to open an issue! However, please note that we *can not* provide support related to hosting- we can only help if something directly related to the program breaks
 
-If you'd like to support *us*, we've got a [Patreon](https://patreon.com/greysdawn) and a [Ko-Fi](https://ko-fi.com/greysdawn) you can chuck some money at, if you're interested. No pressure though 💜
+If you'd like to support *us*, we've got a [Patreon](https://patreon.com/selenated) and a [Ko-Fi](https://ko-fi.com/selenated) you can chuck some money at, if you're interested. No pressure though 🧡
