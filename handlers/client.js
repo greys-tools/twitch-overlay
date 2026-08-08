@@ -3,8 +3,8 @@ import axios from 'axios';
 import { nanoid } from 'nanoid';
 import { getSystem, getProxiedMessage } from 'pluralmind';
 import { SOCKET, ENDPOINTS, EMOTES } from '../constants.js';
-import Subscriptions from '../subscriptions';
-import db from '../db.sqlite' with { type: 'sqlite'};
+import Subscriptions from '../subscriptions/index.js';
+import { DatabaseSync } from 'node:sqlite';
 
 let SUBS = new Map();
 
@@ -16,7 +16,7 @@ export default class Client extends EventEmitter {
 		},
 	})
 
-	db = db;
+	db = new DatabaseSync(`${import.meta.dirname}/../db.sqlite`);
 	ws;
 	queue = [];
 	connected = false;
@@ -117,7 +117,7 @@ export default class Client extends EventEmitter {
 	}
 
 	async getUserToken() {
-		let tokens = await (db.query('select * from users')).get();
+		let tokens = this.db.prepare('select * from users').get();
 		console.log(tokens);
 
 		let req;
@@ -149,9 +149,9 @@ export default class Client extends EventEmitter {
 		console.log(req?.data);
 		if(!req?.data?.access_token) return null;
 
-		await (db.query('update users set access=$access, refresh=$refresh')).run({
-			$access: req.data.access_token,
-			$refresh: req.data.refresh_token
+		this.db.prepare('update users set access=:access, refresh=:refresh').run({
+			access: req.data.access_token,
+			refresh: req.data.refresh_token
 		});
 
 		return req.data.access_token;

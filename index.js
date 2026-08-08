@@ -8,7 +8,7 @@ await client.init();
 
 const app = express();
 app.use(express.json());
-app.use(express.static(__dirname + "/assets"));
+app.use(express.static(import.meta.dirname + "/assets"));
 
 // combined chat and alerts in one overlay
 const index = fs.readFileSync("./pages/index.html");
