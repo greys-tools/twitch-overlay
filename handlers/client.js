@@ -21,6 +21,7 @@ export default class Client extends EventEmitter {
 	queue = [];
 	connected = false;
 	interval;
+	refreshInterval;
 
 	appToken;
 	userToken;
@@ -38,6 +39,13 @@ export default class Client extends EventEmitter {
 		this.on('event', (data) => this.handleEvent(data));
 		this.on('chat', (data) => this.handleChat(data));
 		this.interval = setInterval(() => this.handleQueue(), 3_000);
+
+		// refresh tokens every 60m just to be safe
+		// twitch recommends hourly refresh/validation like this
+		this.refreshInterval = setInterval(async () => {
+			this.userToken = await this.getUserToken();
+			this.appToken = await this.getAppToken();
+		}, 60 * 60 * 1_000);
 	}
 
 	async init() {
