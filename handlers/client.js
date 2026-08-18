@@ -38,6 +38,7 @@ export default class Client extends EventEmitter {
 		this.on('connected', ({ session_id }) => this.setSubs(session_id));
 		this.on('event', (data) => this.handleEvent(data));
 		this.on('chat', (data) => this.handleChat(data));
+		this.on('close', () => this.startSocket());
 		this.interval = setInterval(() => this.handleQueue(), 3_000);
 
 		// refresh tokens every 60m just to be safe
@@ -52,22 +53,7 @@ export default class Client extends EventEmitter {
 		this.appToken = await this.getAppToken();
 		console.log(this.appToken);
 		this.userToken = await this.getUserToken();
-
-		this.ws = new WebSocket(SOCKET);
-		this.ws.addEventListener('message', async (msg) => {
-			let { metadata, payload: data } = JSON.parse(msg.data);
-			console.log(data);
-			if(data?.session?.id) {
-				this.connected = true;
-				this.emit('connected', { session_id: data.session.id })
-			} else {
-				if(metadata?.message_type == "notification") {
-					if(metadata.subscription_type == 'channel.chat.message') {
-						this.emit('chat', { id: nanoid(10), data });
-					} else this.queue.push({ id: nanoid(10), type: metadata.subscription_type, data });
-				}
-			}
-		})
+		await this.startSocket();
 
 		let badges;
 		let globalBadges = await this.reqClient.get(ENDPOINTS.GET_BADGES(), {
@@ -100,6 +86,29 @@ export default class Client extends EventEmitter {
 		for(var p in prns) {
 			this.pronouns.set(p, prns[p]);
 		}
+	}
+
+	async startSocket() {
+		let sck = new WebSocket(SOCKET);
+		sck.addEventListener('message', async (msg) => {
+			let { metadata, payload: data } = JSON.parse(msg.data);
+			console.log(data);
+			if(data?.session?.id) {
+				this.connected = true;
+				this.emit('connected', { session_id: data.session.id })
+			} else {
+				if(metadata?.message_type == "notification") {
+					if(metadata.subscription_type == 'channel.chat.message') {
+						this.emit('chat', { id: nanoid(10), data });
+					} else this.queue.push({ id: nanoid(10), type: metadata.subscription_type, data });
+				}
+			}
+		})
+
+		sck.addEventListener('close', (data) => this.emit('close', data));
+
+		this.ws = sck;
+		return sck;
 	}
 
 	async getAppToken() {
