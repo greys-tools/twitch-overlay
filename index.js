@@ -25,7 +25,7 @@ app.get("/chat-only", async (req, res) => {
 // non-clearing chat (eg. for just chatting scenes)
 const noClear = fs.readFileSync("./pages/no-clear.html");
 app.get("/no-clear", async (req, res) => {
-	return res.status(200).send(chat.toString("utf-8"));
+	return res.status(200).send(noClear.toString("utf-8"));
 });
 
 // just alerts, no chat

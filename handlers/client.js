@@ -56,6 +56,7 @@ export default class Client extends EventEmitter {
 		this.ws = new WebSocket(SOCKET);
 		this.ws.addEventListener('message', async (msg) => {
 			let { metadata, payload: data } = JSON.parse(msg.data);
+			console.log(data);
 			if(data?.session?.id) {
 				this.connected = true;
 				this.emit('connected', { session_id: data.session.id })
@@ -220,9 +221,8 @@ export default class Client extends EventEmitter {
 	}
 
 	async handleChat({ id, data: { event } }) {
-		let { message: { fragments: frags }, badges, color, chatter_user_name: username } = event;
-		// console.log(badges, this.badges.get('subscriber'));
-		// return;
+		let { message: { fragments: frags }, message_type: mtype, badges, color, chatter_user_name: username } = event;
+		if(mtype !== "text") return;
 
 		let type, msg, prns;
 		let preq;
@@ -271,8 +271,20 @@ export default class Client extends EventEmitter {
 			let uml = '';
 
 			for(var f of frags) {
-				if(f.type == 'text') tml += f.text;
-				else tml += `<img src="${EMOTES.replace(':id', f.emote.id)}" class="emoji"/>`;
+				switch(f.type) {
+					case 'text':
+						tml += f.text
+						break;
+					case 'emote':
+						tml += `<img src="${EMOTES.replace(':id', f.emote.id)}" class="emoji"/>`
+						break;
+					case 'mention':
+						tml = f.mention.user_name;
+						break;
+					case 'gif':
+					case 'cheermote':
+						return;
+				}
 			}
 
 			if(badges?.length) {
