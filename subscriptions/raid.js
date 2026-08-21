@@ -10,7 +10,7 @@ export default {
 	},
 	sound: 'RAID',
 	img: 'RAID',
-	async execute(ctx) {
+	async alert(ctx) {
 		return (
 			`<span class="animated">` +
 			split(ctx.from_broadcaster_user_name) +

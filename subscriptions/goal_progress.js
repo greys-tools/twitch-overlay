@@ -10,7 +10,7 @@ export default {
 	},
 	sound: 'GOAL_PROGRESS',
 	img: 'GOAL_PROGRESS',
-	async execute(ctx) {
+	async alert(ctx) {
 		return (
 			`<span class="animated">` +
 			split(ctx.type) +

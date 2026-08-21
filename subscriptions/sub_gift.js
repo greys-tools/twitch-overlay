@@ -10,7 +10,7 @@ export default {
 	},
 	sound: 'SUB_GIFT',
 	img: 'SUB_GIFT',
-	async execute(ctx) {
+	async alert(ctx) {
 		return (
 			`<span class="animated">` +
 			split(ctx.user_name ?? "Anonymous") +

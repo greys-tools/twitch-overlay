@@ -2,9 +2,18 @@ import 'dotenv/config';
 import express from "express";
 import fs from "node:fs";
 import Client from './handlers/client.js';
+import AlertsHandler from './handlers/alerts.js';
+import HooksHandler from './handlers/hooks.js';
 
 const client = new Client();
 await client.init();
+
+let handlers = {};
+handlers.alerts = new AlertsHandler(client);
+await handlers.alerts.init();
+handlers.hooks = new HooksHandler(client);
+await handlers.hooks.init();
+client.handlers = handlers;
 
 const app = express();
 app.use(express.json());
@@ -38,7 +47,7 @@ app.get("/events", async (req, res) => {
 	console.log("New connection request received");
 	let clientId = req.query.client_id;
 
-	client.addClient(clientId, res);
+	client.handlers.alerts.addClient(clientId, res);
 });
 
 const PORT = process.env.PORT ?? 8080;

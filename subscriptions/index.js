@@ -7,6 +7,8 @@ import Raid from './raid.js';
 import Resub from './resub.js';
 import Sub from './sub.js';
 import SubGift from './sub_gift.js';
+import StreamOnline from './stream_online.js';
+import StreamOffline from './stream_offline.js';
 
 export default [
 	Bits,
@@ -17,5 +19,7 @@ export default [
 	Raid,
 	Resub,
 	Sub,
-	SubGift
+	SubGift,
+	StreamOnline,
+	StreamOffline,
 ];

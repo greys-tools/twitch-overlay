@@ -10,7 +10,7 @@ export default {
 	},
 	sound: 'CHEER',
 	img: 'CHEER',
-	async execute(ctx) {
+	async alert(ctx) {
 		return (
 			`<span class="animated">` +
 			split(ctx.user_name) +

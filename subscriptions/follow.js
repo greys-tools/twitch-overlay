@@ -11,12 +11,22 @@ export default {
 	},
 	sound: 'FOLLOW',
 	img: 'FOLLOW',
-	async execute(ctx) {
+	async alert(ctx) {
 		return (
 			`<span class="animated">` +
 			split(ctx.user_name) +
 			`</span>` +
 			` just followed!`
 		)
+	},
+	async hook(ctx) {
+		return [{
+			type: 17,
+			accent_color: 0x5555aa,
+			components: [{
+				type: 10,
+				content: `## New follower!\n**[${ctx.user_name}](<https://twitch.tv/${ctx.user_name}>)** just followed!`
+			}]
+		}]
 	}
 }
