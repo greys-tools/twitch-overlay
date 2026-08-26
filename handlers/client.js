@@ -3,8 +3,7 @@ import axios from 'axios';
 import { nanoid } from 'nanoid';
 import { SOCKET, ENDPOINTS, EMOTES } from '../constants.js';
 import Subscriptions from '../subscriptions/index.js';
-import { DatabaseSync } from 'node:sqlite';
-
+import db from './data.js';
 // handles connections to twitch
 
 export default class Client extends EventEmitter {
@@ -17,7 +16,7 @@ export default class Client extends EventEmitter {
 
 	SUBS = new Map();
 
-	db = new DatabaseSync(`${import.meta.dirname}/../db.sqlite`);
+	db = db;
 	ws;
 	reconnect;
 	connected = false;
@@ -25,6 +24,7 @@ export default class Client extends EventEmitter {
 
 	appToken;
 	userToken;
+	botToken;
 
 	constructor() {
 		super();
@@ -35,22 +35,28 @@ export default class Client extends EventEmitter {
 		// refresh tokens every 60m just to be safe
 		// twitch recommends hourly refresh/validation like this
 		this.refreshInterval = setInterval(async () => {
-			this.userToken = await this.getUserToken();
+			this.userToken = await this.getUserToken(process.env.USER_ID);
+			this.botToken = await this.getUserToken(process.env.BOT_ID);
 			this.appToken = await this.getAppToken();
+			this.emit('tokenUpdate', {
+				userToken: this.userToken,
+				botToken: this.botToken,
+				appToken: this.appToken
+			});
 		}, 60 * 60 * 1_000);
 	}
 
 	async init() {
 		this.appToken = await this.getAppToken();
-		console.log(this.appToken);
-		this.userToken = await this.getUserToken();
+		this.userToken = await this.getUserToken(process.env.USER_ID);
+		this.botToken = await this.getUserToken(process.env.BOT_ID);
 		await this.startSocket();
 	}
 
 	async startSocket() {
 		let url = SOCKET;
 		if(this.reconnect) url = this.reconnect;
-		let sck = new WebSocket(SOCKET);
+		let sck = new WebSocket(url);
 		sck.addEventListener('message', async (msg) => {
 			let { metadata, payload: data } = JSON.parse(msg.data);
 			console.log(data);
@@ -94,19 +100,22 @@ export default class Client extends EventEmitter {
 		return data.access_token;
 	}
 
-	async getUserToken() {
-		let tokens = this.db.prepare('select * from users').get();
+	async getUserToken(id) {
+		let tokens = this.db.getToken(id);
 		console.log(tokens);
 
 		let req;
-		try {
-			req = await axios.get('https://id.twitch.tv/oauth2/validate', {
-				headers: {
-					'Authorization': `OAuth ${tokens.access}`
-				}
-			})
-		} catch(e) {
-			if(e.response) console.error(e.response.status, e.response.data);
+		if(!tokens) this.db.createToken(id);
+		else {
+			try {
+				req = await axios.get('https://id.twitch.tv/oauth2/validate', {
+					headers: {
+						'Authorization': `OAuth ${tokens.access}`
+					}
+				})
+			} catch(e) {
+				if(e.response) console.error(e.response.status, e.response.data);
+			}
 		}
 
 		if(req?.status == 200) return tokens.access;
@@ -127,9 +136,10 @@ export default class Client extends EventEmitter {
 		console.log(req?.data);
 		if(!req?.data?.access_token) return null;
 
-		this.db.prepare('update users set access=:access, refresh=:refresh').run({
+		this.db.updateToken({
 			access: req.data.access_token,
-			refresh: req.data.refresh_token
+			refresh: req.data.refresh_token,
+			id
 		});
 
 		return req.data.access_token;
@@ -156,7 +166,6 @@ export default class Client extends EventEmitter {
 					console.log(s.data.type, e.response.status, e.response.data);
 				}
 			}
-				
 		}
 	}
 }

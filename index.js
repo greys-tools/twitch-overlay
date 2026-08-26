@@ -4,15 +4,19 @@ import fs from "node:fs";
 import Client from './handlers/client.js';
 import AlertsHandler from './handlers/alerts.js';
 import HooksHandler from './handlers/hooks.js';
+import CommandsHandler from './handlers/commands.js';
 
 const client = new Client();
 await client.init();
 
-let handlers = {};
-handlers.alerts = new AlertsHandler(client);
+let handlers = {
+	alerts: new AlertsHandler(client),
+	hooks: new HooksHandler(client),
+	commands: new CommandsHandler(client)
+};
 await handlers.alerts.init();
-handlers.hooks = new HooksHandler(client);
 await handlers.hooks.init();
+await handlers.commands.init();
 client.handlers = handlers;
 
 const app = express();
