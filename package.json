@@ -16,6 +16,7 @@
 		"express": "^4.19.2",
 		"nanoid": "^6.0.1",
 		"pluralmind": "^2.1.0",
-		"tmi.js": "^1.8.5"
+		"tmi.js": "^1.8.5",
+		"vts-js": "github:greys-tools/vts-js"
 	}
 }
