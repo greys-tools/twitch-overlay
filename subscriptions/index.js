@@ -4,6 +4,7 @@ import Follow from './follow.js';
 import GoalEnd from './goal_end.js';
 import GoalProgress from './goal_progress.js';
 import Raid from './raid.js';
+import Redeem from './redeem.js';
 import Resub from './resub.js';
 import Sub from './sub.js';
 import SubGift from './sub_gift.js';
@@ -17,6 +18,7 @@ export default [
 	GoalEnd,
 	GoalProgress,
 	Raid,
+	Redeem,
 	Resub,
 	Sub,
 	SubGift,

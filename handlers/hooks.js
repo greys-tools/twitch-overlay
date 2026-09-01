@@ -47,7 +47,7 @@ export default class HooksHandler {
 	}
 
 	async handleEvent({ id, type, data }) {
-		let subtype = await SUBS.get(type);
+		let subtype = await this.client.SUBS.get(type);
 		if(!subtype || !subtype?.hook) return;
 		let result = await subtype.hook(data.event);
 

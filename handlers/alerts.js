@@ -63,6 +63,7 @@ export default class AlertsHandler {
 		if(!this.queue.length) return;
 
 		let item = this.queue.shift();
+		console.log(item);
 		await this.handleEvent(item);
 	}
 

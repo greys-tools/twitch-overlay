@@ -72,6 +72,8 @@ export default class Client extends EventEmitter {
 				case 'notification':
 					if(metadata.subscription_type == 'channel.chat.message') {
 						this.emit('chat', { id: nanoid(10), data });
+					} else if(metadata.subscription_type == 'channel.channel_points_custom_reward_redemption.add') {
+						this.emit('redeem', { id: nanoid(10), data });
 					} else this.emit('event', { id: nanoid(10), type: metadata.subscription_type, data });
 					break;
 				default:

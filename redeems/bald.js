@@ -1,10 +1,9 @@
 import PClient from '../handlers/vts.js';
 
-export default class BaldCommand {
+export default class BaldRedeem {
 	client;
 
-	name = 'bald';
-	description = "Make me bald!";
+	title = 'BALD!';
 
 	interval;
 	endTime;

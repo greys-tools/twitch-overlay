@@ -5,6 +5,7 @@ import Client from './handlers/client.js';
 import AlertsHandler from './handlers/alerts.js';
 import HooksHandler from './handlers/hooks.js';
 import CommandsHandler from './handlers/commands.js';
+import RedeemsHandler from './handlers/redeems.js';
 
 const client = new Client();
 await client.init();
@@ -12,11 +13,13 @@ await client.init();
 let handlers = {
 	alerts: new AlertsHandler(client),
 	hooks: new HooksHandler(client),
-	commands: new CommandsHandler(client)
+	commands: new CommandsHandler(client),
+	redeems: new RedeemsHandler(client),
 };
 await handlers.alerts.init();
 await handlers.hooks.init();
 await handlers.commands.init();
+await handlers.redeems.init();
 client.handlers = handlers;
 
 const app = express();
